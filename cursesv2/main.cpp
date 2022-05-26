@@ -12,6 +12,7 @@ int main()
 
 	while (game.get_playing())
 	{
+		srand(time(NULL));
 		game.main_menu();
 	}
 

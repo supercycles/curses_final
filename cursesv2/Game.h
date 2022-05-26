@@ -3,6 +3,7 @@
 #define GAME_H
 
 #include "Character.h"
+#include "Enemy.h"
 
 class Game
 {
@@ -23,10 +24,9 @@ private:
 	std::vector<Character> characters;
 	int active_character;
 
-	/*
-	std::vector<Enemy> enemies;
+	std::vector<std::vector<Enemy>> enemies;
 	int active_enemy;
-	*/
+
 public:
 	Game();
 	virtual ~Game();
@@ -39,9 +39,13 @@ public:
 	//Save Functions
 	void save_game();
 
+	//Print Functions
+	std::string enemy_as_string(std::vector<Enemy> v, int c);
+
 	//Load Functions
 	void load_game();
-	void build_character(int c, std::string t, Character& l);
+	void build_character(int c, std::string t, Character& l, std::vector<Enemy>& e);
+	void build_enemy(std::string t, std::vector<Enemy>& e);
 	void new_character();
 	void load_character();
 

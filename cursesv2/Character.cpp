@@ -160,5 +160,5 @@ string Character::as_string()
 		to_string(min_dmg) + ' ' +
 		to_string(max_dmg) + ' ' +
 		to_string(y_pos) + ' ' +
-		to_string(x_pos);
+		to_string(x_pos) + ' ';
 }

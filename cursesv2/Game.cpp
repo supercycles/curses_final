@@ -20,6 +20,8 @@ Game::Game()
 	filename = "save.txt";
 
 	active_character = 0;
+
+	active_enemy = 0;
 }
 
 Game::~Game()
@@ -98,18 +100,42 @@ void Game::menu_select(string c)
 void Game::save_game()
 {
 	ofstream outfile(filename);
+	int counter = 0;
 
 	if (outfile.is_open())
 	{
-		for (Character& c : characters)
+		for (Character c : characters)
 		{
-			outfile << c.as_string() << endl;
+			outfile << c.as_string() << enemy_as_string(enemies[counter], counter) << endl;
+			counter++;
 		}
 	}
 
 	outfile.close();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// PRINT FUNCTIONS
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+string Game::enemy_as_string(vector<Enemy> v, int c)
+{
+	string enemy_string = "";
+	for (int i = 0; i < enemies.size(); i++)
+	{
+		if (i == c)
+		{
+			for (int j = 0; j < enemies[i].size(); j++)
+			{
+				enemy_string += (to_string(enemies[i].at(j).get_level()) + to_string(enemies[i].at(j).get_y_pos()) + to_string(enemies[i].at(j).get_x_pos()) + ' ');
+			}
+		}
+	}
+
+	return enemy_string;
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -128,19 +154,21 @@ void Game::load_game()
 		stringstream line(temp);
 		string token;
 		Character temp_char("");
+		vector<Enemy> temp_enemies;
 
 		while (getline(line, token, ' '))
 		{
-			build_character(counter, token, temp_char);
+			build_character(counter, token, temp_char, temp_enemies);
 			counter++;
 		}
 		characters.push_back(temp_char);
+		enemies.push_back(temp_enemies);
 	}
 
 	infile.close();
 }
 
-void Game::build_character(int c, string t, Character& l)
+void Game::build_character(int c, string t, Character& l, vector<Enemy>& e)
 {
 	switch (c)
 	{
@@ -156,8 +184,23 @@ void Game::build_character(int c, string t, Character& l)
 	case 9: l.set_max_dmg(stoi(t)); break;
 	case 10: l.set_y_pos(stoi(t)); break;
 	case 11: l.set_x_pos(stoi(t)); break;
-	default: break;
+	default: build_enemy(t, e); break;
 	}
+}
+
+void Game::build_enemy(string t, vector<Enemy>& e)
+{
+	Enemy temp_enemy(0, 0, 0);
+	for (int i = 0; i < t.size(); i++)
+	{
+		switch (i)
+		{
+		case 0: temp_enemy.set_level(stoi(t.substr(0, 1))); break;
+		case 1: temp_enemy.set_y_pos(stoi(t.substr(1, 1))); break;
+		case 2: temp_enemy.set_x_pos(stoi(t.substr(2))); break;
+		}
+	}
+	e.push_back(temp_enemy);
 }
 
 void Game::new_character()
@@ -178,6 +221,15 @@ void Game::new_character()
 	Character new_char(char_name);
 	characters.push_back(new_char);
 	active_character = characters.size() - 1;
+
+	vector<Enemy> char_enemies;
+	enemies.push_back(char_enemies);
+	Enemy e1(1, rand() % 6 + 1, rand() % 20 + 1);
+	Enemy e2(1, rand() % 6 + 1, rand() % 20 + 1);
+	Enemy e3(1, rand() % 6 + 1, rand() % 20 + 1);
+	enemies.at(active_character).push_back(e1);
+	enemies.at(active_character).push_back(e2);
+	enemies.at(active_character).push_back(e3);
 
 	wclear(char_win);
 	wrefresh(char_win);
@@ -267,17 +319,21 @@ void Game::start_game()
 	wrefresh(main_game_win);
 	wrefresh(map_win);
 	wrefresh(info_win);
-
-	/*
+	
 	if (enemies.size() > 0)
 	{
 		for (int e = 0; e < enemies.size(); e++)
 		{
-			mvwaddch(map_win, enemies.at(e).get_y_pos(), enemies.at(e).get_x_pos(), '!');
+			if (active_character == e)
+			{
+				for (int j = 0; j < enemies.at(e).size(); j++)
+				{
+					mvwaddch(map_win, enemies[e].at(j).get_y_pos(), enemies[e].at(j).get_x_pos(), '!');
+				}
+			}
 		}
 	}
-	*/
-
+	
 	mvwprintw(info_win, 0, 35, "INFO");
 	mvwprintw(info_win, 1, 1, "Astre Depths");
 	mvwprintw(info_win, 2, 1, "Floor: 1/4");
