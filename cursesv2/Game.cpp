@@ -2,6 +2,8 @@
 #include "Game.h"
 
 using namespace std;
+using namespace std::this_thread;
+using namespace std::chrono;
 
 Game::Game()
 {
@@ -42,6 +44,25 @@ void Game::generate_title_win()
 
 	mvwprintw(title_win, 4, 25, "C        U        R        S        E        S (v2)");
 	mvwprintw(title_win, 8, 29, "A Rogue-like Game Made By Ethan Ordorica");
+	mvprintw(13, 40, "                                                |>>>");
+	mvprintw(14, 40, "                                                |");
+	mvprintw(15, 40, "                                            _  _|_  _");
+	mvprintw(16, 40, "                                           |;|_|;|_|;|");
+	mvprintw(17, 42, "                                         \\\\.    .  /");
+	mvprintw(18, 42, "                                          \\\\:  .  /");
+	mvprintw(19, 40, "                                             ||:   |");
+	mvprintw(20, 40, "                                             ||:.  |");
+	mvprintw(21, 40, "                                             ||:  .|");
+	mvprintw(22, 40, "                                             ||:   |       \\,/");
+	mvprintw(23, 40, "                                             ||: , |            /`\\");
+	mvprintw(24, 40, "                                             ||:   |");
+	mvprintw(25, 40, "                                             ||: . |");
+	mvprintw(26, 40, "              __                            _||_   |");
+	mvprintw(27, 40, "     ____--`~    '--~~__            __ ----~    ~`---,              ___");
+	mvprintw(28, 40, "-~--~                   ~---__ ,--~'                  ~~----_____-~'   `~----~~");
+	mvprintw(29, 35, "_~--'");
+
+	refresh();
 
 	wrefresh(title_win);
 }
@@ -515,8 +536,8 @@ void Game::build_combat_window()
 		{
 			switch (highlight)
 			{
-			//case 0: player_attack(); break;
-			//case 1: player_block(); break;
+			case 0: player_attack(); break;
+			case 1: player_block(); break;
 			//case 2: build_inv_menu(); break;
 			case 3: build_char_menu(); break;
 			case 4: characters[active_character].set_x_pos(characters[active_character].get_x_pos() - 1); return; break;
@@ -524,6 +545,71 @@ void Game::build_combat_window()
 		}
 	}
 }
+
+void Game::player_attack()
+{
+	characters[active_character].set_curr_attack();
+	enemies[active_character].at(active_enemy).set_hp(enemies[active_character].at(active_enemy).get_hp() - characters[active_character].get_curr_attack());
+	if (enemies[active_character].at(active_enemy).get_hp() <= 0)
+	{
+		enemy_death();
+	}
+	else
+	{
+		take_damage();
+	}
+}
+
+void Game::player_block()
+{
+	enemies[active_character].at(active_enemy).start_curr_attack();
+	enemies[active_character].at(active_enemy).set_curr_attack(enemies[active_character].at(active_enemy).get_curr_attack() - characters[active_character].get_block());
+	take_damage();
+}
+
+void Game::take_damage()
+{
+	characters[active_character].set_hp(characters[active_character].get_hp() - enemies[active_character].at(active_enemy).get_curr_attack());
+	if (characters[active_character].get_hp() <= 0)
+	{
+		player_death();
+	}
+	build_char_menu();
+	mvwprintw(character_win, 2, 1, "              ");
+	wrefresh(character_win);
+	mvwprintw(character_win, 2, 1, "HP: %d/%d", characters[active_character].get_hp(), characters[active_character].get_hp_max());
+	wrefresh(character_win);
+
+	mvwprintw(info_win, 2, 1, "              ");
+	wrefresh(info_win);
+	mvwprintw(info_win, 2, 1, "HP: %d/%d", enemies[active_character].at(active_enemy).get_hp(), enemies[active_character].at(active_enemy).get_hp_max());
+	wrefresh(info_win);
+}
+
+void Game::player_death()
+{
+	clear();
+	move(15, 52);
+	printw("!!!YOU DIED!!!");
+	refresh();
+	sleep_for(seconds(3));
+
+	wclear(map_win);
+	wrefresh(map_win);
+	clear();
+	refresh();
+	build_game_menu();
+}
+
+
+void Game::enemy_death()
+{
+	wclear(map_win);
+	wrefresh(map_win);
+	wclear(combat_win);
+	wrefresh(combat_win);
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

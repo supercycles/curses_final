@@ -8,5 +8,7 @@
 #include <fstream>
 #include <sstream>
 #include <ctime>
+#include <chrono>
+#include <thread>
 
 #endif /*INCLUDES_H*/

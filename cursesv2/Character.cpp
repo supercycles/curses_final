@@ -52,6 +52,13 @@ void Character::initialize(string n)
 	x_pos = 4;
 }
 
+void Character::set_curr_attack()
+{
+	curr_attack = rand() % max_dmg;
+	while (curr_attack < min_dmg)
+		curr_attack++;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // MOVE FUNCTIONS

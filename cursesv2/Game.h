@@ -58,6 +58,11 @@ public:
 	//Combat Functions
 	void start_combat();
 	void build_combat_window();
+	void player_attack();
+	void player_block();
+	void take_damage();
+	void player_death();
+	void enemy_death();
 
 	//Window Functions
 	void build_char_menu();

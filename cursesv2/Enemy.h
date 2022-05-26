@@ -41,6 +41,8 @@ public:
 	void set_level(int l) { level = l; hp_max = level * 5; hp = hp_max; min_dmg = level * 1; max_dmg = level * 2; }
 	void set_hp(int h) { hp = h; }
 
+	void set_curr_attack(int a) { curr_attack = a; }
+
 	void set_y_pos(int y) { y_pos = y; }
 	void set_x_pos(int x) { x_pos = x; }
 };

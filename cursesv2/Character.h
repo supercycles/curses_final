@@ -20,6 +20,8 @@ private:
 
 	char character;
 
+	int curr_attack;
+
 	int y_max, x_max;
 	int y_pos;
 	int x_pos;
@@ -35,6 +37,7 @@ public:
 	Character(std::string n);
 	virtual ~Character();
 	void initialize(std::string n);
+	void set_curr_attack();
 
 	//Move Functions
 	void set_move_win(WINDOW* w, WINDOW* mw, WINDOW* iw, WINDOW* chw, WINDOW* invw, WINDOW* menw, int y, int x, char c);
@@ -59,6 +62,8 @@ public:
 	const int get_block() const { return block; }
 	const int get_min_dmg() const { return min_dmg; }
 	const int get_max_dmg() const { return max_dmg; }
+
+	const int get_curr_attack() const { return curr_attack; }
 
 	const int get_y_pos() const { return y_pos; }
 	const int get_x_pos() const { return x_pos; }
