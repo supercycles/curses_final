@@ -84,16 +84,81 @@ void Game::main_menu()
 
 void Game::menu_select(string c)
 {
-	if (c == "Save & Quit") { /*save_game();*/ playing = false; }
-	//else if (c == "Load Character") { if (characters.size() > 0) load_character(); }
+	if (c == "Save & Quit") { playing = false; }
+	else if (c == "Load Character") { if (characters.size() > 0) load_character(); }
 	else if (c == "New Character") { if (characters.size() < 8) new_character(); }
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// SAVE FUNCTIONS
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Game::save_game()
+{
+	ofstream outfile(filename);
+
+	if (outfile.is_open())
+	{
+		for (Character& c : characters)
+		{
+			outfile << c.as_string() << endl;
+		}
+	}
+
+	outfile.close();
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // LOAD FUNCTIONS
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Game::load_game()
+{
+	ifstream infile(filename);
+	string temp;
+
+	while (getline(infile, temp))
+	{
+		int counter = 0;
+		stringstream line(temp);
+		string token;
+		Character temp_char("");
+
+		while (getline(line, token, ' '))
+		{
+			build_character(counter, token, temp_char);
+			counter++;
+		}
+		characters.push_back(temp_char);
+	}
+
+	infile.close();
+}
+
+void Game::build_character(int c, string t, Character& l)
+{
+	switch (c)
+	{
+	case 0: l.set_name(t); break;
+	case 1: l.set_level(stoi(t)); break;
+	case 2: l.set_hp(stoi(t)); break;
+	case 3: l.set_hp_max(stoi(t)); break;
+	case 4: l.set_xp(stoi(t)); break;
+	case 5: l.set_xp_next(stoi(t)); break;
+	case 6: l.set_block(stoi(t)); break;
+	case 7: l.set_defense(stoi(t)); break;
+	case 8: l.set_min_dmg(stoi(t)); break;
+	case 9: l.set_max_dmg(stoi(t)); break;
+	case 10: l.set_y_pos(stoi(t)); break;
+	case 11: l.set_x_pos(stoi(t)); break;
+	default: break;
+	}
+}
 
 void Game::new_character()
 {
@@ -116,6 +181,70 @@ void Game::new_character()
 
 	wclear(char_win);
 	wrefresh(char_win);
+	start_game();
+}
+
+void Game::load_character()
+{
+	refresh();
+	noecho();
+
+	generate_title_win();
+	WINDOW* load_win = newwin(12, 12, 13, 52);
+	refresh();
+
+	if (characters.size() == 0)
+	{
+		wclear(load_win);
+		wrefresh(load_win);
+		return;
+	}
+
+	keypad(load_win, true);
+	box(load_win, 0, 0);
+
+	mvwprintw(load_win, 0, 4, "LOAD");
+	int choice;
+	int highlight = 0;
+
+	while (1)
+	{
+		for (int i = 0; i < characters.size(); i++)
+		{
+			if (i == highlight)
+				wattron(load_win, A_REVERSE);
+			mvwprintw(load_win, 1 + i, 1, characters[i].get_name().c_str());
+			wattroff(load_win, A_REVERSE);
+		}
+
+		if (highlight == characters.size())
+			wattron(load_win, A_REVERSE);
+		mvwprintw(load_win, 10, 1, "Go Back");
+		wattroff(load_win, A_REVERSE);
+
+		choice = wgetch(load_win);
+		switch (choice)
+		{
+		case KEY_DOWN: if (highlight < characters.size()) highlight++; break;
+		case KEY_UP: if (highlight > 0) highlight--; break;
+		default: break;
+		}
+
+		if (choice == 10)
+		{
+			wclear(load_win);
+			wrefresh(load_win);
+			if (highlight == characters.size())
+			{
+				return;
+			}
+			else
+			{
+				active_character = highlight;
+				break;
+			}
+		}
+	}
 	start_game();
 }
 

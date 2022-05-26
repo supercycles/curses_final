@@ -36,8 +36,14 @@ public:
 	void main_menu();
 	void menu_select(std::string c);
 
+	//Save Functions
+	void save_game();
+
 	//Load Functions
+	void load_game();
+	void build_character(int c, std::string t, Character& l);
 	void new_character();
+	void load_character();
 
 	//Game Functions
 	void start_game();
