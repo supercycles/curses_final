@@ -38,7 +38,7 @@ public:
 	const int get_x_pos() const { return x_pos; }
 
 	//Mutators
-	void set_level(int l) { level = l; }
+	void set_level(int l) { level = l; hp_max = level * 5; hp = hp_max; min_dmg = level * 1; max_dmg = level * 2; }
 	void set_hp(int h) { hp = h; }
 
 	void set_y_pos(int y) { y_pos = y; }

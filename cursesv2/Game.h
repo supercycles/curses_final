@@ -18,6 +18,7 @@ private:
 	WINDOW* main_game_win;
 	WINDOW* map_win;
 	WINDOW* info_win;
+	WINDOW* combat_win;
 
 	std::string filename;
 
@@ -41,6 +42,7 @@ public:
 
 	//Print Functions
 	std::string enemy_as_string(std::vector<Enemy> v, int c);
+	void print_enemies();
 
 	//Load Functions
 	void load_game();
@@ -52,6 +54,10 @@ public:
 	//Game Functions
 	void start_game();
 	void start_move();
+
+	//Combat Functions
+	void start_combat();
+	void build_combat_window();
 
 	//Window Functions
 	void build_char_menu();

@@ -15,6 +15,7 @@ Game::Game()
 	main_game_win = newwin(20, 40, 5, 60);
 	map_win = newwin(8, 30, 10, 65);
 	info_win = newwin(4, 40, 1, 60);
+	combat_win = newwin(7, 30, 15, 65);
 	refresh();
 
 	filename = "save.txt";
@@ -135,6 +136,23 @@ string Game::enemy_as_string(vector<Enemy> v, int c)
 	}
 
 	return enemy_string;
+}
+
+void Game::print_enemies()
+{
+	if (enemies.size() > 0)
+	{
+		for (int e = 0; e < enemies.size(); e++)
+		{
+			if (active_character == e)
+			{
+				for (int j = 0; j < enemies.at(e).size(); j++)
+				{
+					mvwaddch(map_win, enemies[e].at(j).get_y_pos(), enemies[e].at(j).get_x_pos(), '!');
+				}
+			}
+		}
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -320,19 +338,7 @@ void Game::start_game()
 	wrefresh(map_win);
 	wrefresh(info_win);
 	
-	if (enemies.size() > 0)
-	{
-		for (int e = 0; e < enemies.size(); e++)
-		{
-			if (active_character == e)
-			{
-				for (int j = 0; j < enemies.at(e).size(); j++)
-				{
-					mvwaddch(map_win, enemies[e].at(j).get_y_pos(), enemies[e].at(j).get_x_pos(), '!');
-				}
-			}
-		}
-	}
+	print_enemies();
 	
 	mvwprintw(info_win, 0, 35, "INFO");
 	mvwprintw(info_win, 1, 1, "Astre Depths");
@@ -374,21 +380,149 @@ void Game::start_move()
 
 	do
 	{
+		print_enemies();
+
 		if (characters[active_character].get_hp() <= 0)
 		{
 			break;
 		}
+
+		for (int i = 0; i < enemies.at(active_character).size(); i++)
+		{
+			if (characters[active_character].get_y_pos() == enemies[active_character].at(i).get_y_pos() && characters[active_character].get_x_pos() == enemies[active_character].at(i).get_x_pos())
+			{
+				active_enemy = i;
+				start_combat();
+			}
+		}
 		characters[active_character].display();
+
+		box(map_win, 0, 0);
+		box(info_win, 0, 0);
+		box(main_game_win, 0, 0);
+
+		mvwprintw(info_win, 0, 35, "INFO");
+		mvwprintw(info_win, 1, 1, "Astre Depths");
+		mvwprintw(info_win, 2, 1, "Floor: 1/4");
+
+		mvwprintw(main_game_win, 0, 36, "MAP");
+		mvwprintw(main_game_win, 19, 1, "Press 'X' to Go Back");
+		mvwprintw(main_game_win, 13, 5, "@ = You");
+		mvwprintw(main_game_win, 13, 26, "! = Enemy");
+
+		print_enemies();
+
+		mvwaddch(map_win, characters[active_character].get_y_pos(), characters[active_character].get_x_pos(), '@');
+
+		wrefresh(main_game_win);
+		wrefresh(info_win);
 		wrefresh(map_win);
 	} while (characters[active_character].get_move() != 'x');
 
 	box(main_game_win, 0, 0);
 	box(map_win, 0, 0);
+
+	print_enemies();
 	mvwprintw(main_game_win, 0, 36, "MAP");
-	mvwprintw(main_game_win, 13, 5, "                                 ");
+	mvwprintw(main_game_win, 13, 5, "                              ");
 
 	wrefresh(main_game_win);
 	wrefresh(map_win);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// COMBAT FUNCTIONS
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Game::start_combat()
+{
+	wclear(main_game_win);
+	wrefresh(main_game_win);
+	wclear(map_win);
+	wrefresh(map_win);
+	wclear(info_win);
+	wrefresh(info_win);
+
+	enemies[active_character].at(active_enemy).start_curr_attack();
+
+	box(main_game_win, 0, 0);
+	box(info_win, 0, 0);
+	mvwprintw(info_win, 0, 35, "INFO");
+	mvwprintw(info_win, 1, 1, "Level %d %s", enemies[active_character].at(active_enemy).get_level(), enemies[active_character].at(active_enemy).get_name().c_str());
+	mvwprintw(info_win, 2, 1, "HP: %d/%d", enemies[active_character].at(active_enemy).get_hp(), enemies[active_character].at(active_enemy).get_hp_max());
+	mvwprintw(main_game_win, 0, 33, "COMBAT");
+	mvwprintw(main_game_win, 3, 2, "> You encountered a level %d %s!", enemies[active_character].at(active_enemy).get_level(), enemies[active_character].at(active_enemy).get_name().c_str());
+	mvwprintw(main_game_win, 5, 2, "> %s is attacking for %d damage!", enemies[active_character].at(active_enemy).get_name().c_str(), enemies[active_character].at(active_enemy).get_curr_attack());
+	mvwprintw(main_game_win, 7, 2, "> What will you do?");
+
+	wrefresh(main_game_win);
+	wrefresh(info_win);
+	build_combat_window();
+
+	wclear(main_game_win);
+	wrefresh(main_game_win);
+	wclear(info_win);
+	wrefresh(info_win);
+}
+
+void Game::build_combat_window()
+{
+	keypad(combat_win, true);
+	box(combat_win, 0, 0);
+	wrefresh(combat_win);
+	noecho();
+
+	vector<string> options = { "Attack", "Block", "Inventory", "Character Sheet", "Flee" };
+	int choice;
+	int highlight = 0;
+
+	while (1)
+	{
+		if (characters[active_character].get_hp() <= 0)
+		{
+			wclear(combat_win);
+			wrefresh(combat_win);
+			break;
+		}
+
+		if (enemies[active_character].at(active_enemy).get_hp() <= 0)
+		{
+			enemies[active_character].erase(enemies[active_character].begin() + active_enemy);
+			wclear(combat_win);
+			wrefresh(map_win);
+			wrefresh(combat_win);
+			break;
+		}
+
+		for (int i = 0; i < options.size(); i++)
+		{
+			if (highlight == i)
+				wattron(combat_win, A_REVERSE);
+			mvwprintw(combat_win, 1 + i, 1, options[i].c_str());
+			wattroff(combat_win, A_REVERSE);
+		}
+
+		choice = wgetch(combat_win);
+		switch (choice)
+		{
+		case KEY_DOWN: if (highlight < options.size() - 1) highlight++; break;
+		case KEY_UP: if (highlight > 0) highlight--; break;
+		}
+
+		if (choice == 10)
+		{
+			switch (highlight)
+			{
+			//case 0: player_attack(); break;
+			//case 1: player_block(); break;
+			//case 2: build_inv_menu(); break;
+			case 3: build_char_menu(); break;
+			case 4: characters[active_character].set_x_pos(characters[active_character].get_x_pos() - 1); return; break;
+			}
+		}
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
