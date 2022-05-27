@@ -123,12 +123,14 @@ void Game::save_game()
 {
 	ofstream outfile(filename);
 	int counter = 0;
+	int i;
 
 	if (outfile.is_open())
 	{
 		for (Character c : characters)
 		{
-			outfile << c.as_string() << enemy_as_string(enemies[counter], counter) << endl;
+			for (i = 0; i < enemies[counter].size(); i++) {}
+			outfile << c.as_string() << i << ' ' << enemy_as_string(enemies[counter], counter) << c.inventory_as_string() << endl;
 			counter++;
 		}
 	}
@@ -210,9 +212,9 @@ void Game::load_game()
 		Character temp_char("");
 		vector<Enemy> temp_enemies;
 
-		while (getline(line, token, ' '))
+		while (getline(line, token, ' ') && counter < 13)
 		{
-			build_character(counter, token, temp_char, temp_enemies);
+			build_character(counter, token, line, temp_char, temp_enemies);
 			counter++;
 		}
 		characters.push_back(temp_char);
@@ -222,7 +224,7 @@ void Game::load_game()
 	infile.close();
 }
 
-void Game::build_character(int c, string t, Character& l, vector<Enemy>& e)
+void Game::build_character(int& c, string t, stringstream& line, Character& l, vector<Enemy>& e)
 {
 	switch (c)
 	{
@@ -238,23 +240,55 @@ void Game::build_character(int c, string t, Character& l, vector<Enemy>& e)
 	case 9: l.set_max_dmg(stoi(t)); break;
 	case 10: l.set_y_pos(stoi(t)); break;
 	case 11: l.set_x_pos(stoi(t)); break;
-	default: build_enemy(t, e); break;
+	case 12: build_enemy(c, stoi(t), line, l, e); break;
 	}
 }
 
-void Game::build_enemy(string t, vector<Enemy>& e)
+void Game::build_enemy(int& c, int count, stringstream& line, Character& l, vector<Enemy>& e)
 {
-	Enemy temp_enemy(0, 0, 0);
-	for (int i = 0; i < t.size(); i++)
+	int counter = 0;
+
+	for (int i = 0; i < line.str().size(); i++)
+	{
+		string token;
+		while (getline(line, token, ' '))
+		{
+			if (counter >= count)
+			{
+				build_inventory(counter, token, l);
+				break;
+			}
+
+			Enemy temp_enemy(0, 0, 0);
+			for (int i = 0; i < token.size(); i++)
+			{
+				switch (i)
+				{
+				case 0: temp_enemy.set_level(stoi(token.substr(0, 1))); break;
+				case 1: temp_enemy.set_y_pos(stoi(token.substr(1, 1))); break;
+				case 2: temp_enemy.set_x_pos(stoi(token.substr(2))); break;
+				}
+			}
+			e.push_back(temp_enemy);
+			counter++;
+		}
+	}
+	
+}
+
+void Game::build_inventory(int& c, string token, Character& l)
+{
+	Item temp_item;
+	for (int i = 0; i < token.size(); i++)
 	{
 		switch (i)
 		{
-		case 0: temp_enemy.set_level(stoi(t.substr(0, 1))); break;
-		case 1: temp_enemy.set_y_pos(stoi(t.substr(1, 1))); break;
-		case 2: temp_enemy.set_x_pos(stoi(t.substr(2))); break;
+		case 0: temp_item.set_equipped(stoi(token.substr(0, 1))); break;
+		case 1: temp_item.initialize(stoi(token.substr(1))); break;
 		}
 	}
-	e.push_back(temp_enemy);
+	l.get_inventory().push_back(shared_ptr<Item> (new Item(temp_item.get_equipped_int(), temp_item.get_id_int())));
+
 }
 
 void Game::new_character()
@@ -275,6 +309,8 @@ void Game::new_character()
 	Character new_char(char_name);
 	characters.push_back(new_char);
 	active_character = characters.size() - 1;
+
+	characters[active_character].add_item();
 
 	vector<Enemy> char_enemies;
 	enemies.push_back(char_enemies);

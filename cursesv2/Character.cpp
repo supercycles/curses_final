@@ -91,6 +91,12 @@ void Character::set_curr_attack()
 		curr_attack++;
 }
 
+void Character::add_item()
+{
+	inventory.push_back(shared_ptr<Item>(new Item(0)));
+	inventory.push_back(shared_ptr<Item>(new Item(2)));
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // MOVE FUNCTIONS
@@ -200,4 +206,14 @@ string Character::as_string()
 		to_string(max_dmg) + ' ' +
 		to_string(y_pos) + ' ' +
 		to_string(x_pos) + ' ';
+}
+
+string Character::inventory_as_string()
+{
+	string items = "";
+	for (shared_ptr<Item> i : inventory)
+	{
+		items += (i.get()->get_equipped() + i.get()->get_id() + ' ');
+	}
+	return items;
 }

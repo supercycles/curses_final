@@ -45,6 +45,8 @@ public:
 
 	void set_curr_attack();
 
+	void add_item();
+
 	//Move Functions
 	void set_move_win(WINDOW* w, WINDOW* mw, WINDOW* iw, WINDOW* chw, WINDOW* invw, WINDOW* menw, int y, int x, char c);
 	void move_up();
@@ -56,6 +58,7 @@ public:
 
 	//Print Functions
 	std::string as_string();
+	std::string inventory_as_string();
 
 	//Accessors
 	const std::string get_name() const { return name; }

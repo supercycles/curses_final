@@ -46,8 +46,9 @@ public:
 
 	//Load Functions
 	void load_game();
-	void build_character(int c, std::string t, Character& l, std::vector<Enemy>& e);
-	void build_enemy(std::string t, std::vector<Enemy>& e);
+	void build_character(int& c, std::string t, std::stringstream& line, Character& l, std::vector<Enemy>& e);
+	void build_enemy(int& c, int count, std::stringstream& line, Character& l, std::vector<Enemy>& e);
+	void build_inventory(int& c, std::string token, Character& l);
 	void new_character();
 	void load_character();
 

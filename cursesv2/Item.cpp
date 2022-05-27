@@ -3,11 +3,27 @@
 
 using namespace std;
 
+Item::Item()
+{
+	id = 0;
+	equipped = 0;
+	name = "";
+}
+
 Item::Item(int d)
 {
 	id = 0;
+	equipped = 0;
 	name = "";
 	initialize(d);
+}
+
+Item::Item(int e, int d)
+{
+	equipped = e;
+	id = d;
+	name = "";
+	initialize(id);
 }
 
 Item::~Item()
