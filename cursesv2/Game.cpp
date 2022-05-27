@@ -14,6 +14,7 @@ Game::Game()
 	game_menu_win = newwin(10, 20, 5, 20);
 	character_win = newwin(10, 20, 15, 20);
 	inventory_win = newwin(10, 20, 15, 20);
+	shop_win = newwin(10, 20, 15, 20);
 	main_game_win = newwin(20, 40, 5, 60);
 	map_win = newwin(8, 30, 10, 65);
 	info_win = newwin(4, 40, 1, 60);
@@ -310,7 +311,7 @@ void Game::new_character()
 	characters.push_back(new_char);
 	active_character = characters.size() - 1;
 
-	characters[active_character].add_item();
+	//characters[active_character].add_item();
 
 	vector<Enemy> char_enemies;
 	enemies.push_back(char_enemies);
@@ -675,12 +676,15 @@ void Game::enemy_death()
 	wrefresh(main_game_win);
 
 	int gained_xp = (enemies[active_character].at(active_enemy).get_level() * enemies[active_character].at(active_enemy).get_level()) * 10;
+	int gained_gold = rand() % (enemies[active_character].at(active_enemy).get_level() * 10) + 1;
 	characters[active_character].gain_xp(gained_xp);
+	characters[active_character].gain_gold(gained_gold);
 
 	box(main_game_win, 0, 0);
 	mvwprintw(main_game_win, 0, 33, "COMBAT");
 	mvwprintw(main_game_win, 7, 3, "> You killed the %s!", enemies[active_character].at(active_enemy).get_name().c_str());
 	mvwprintw(main_game_win, 9, 3, "> You gain %d XP.", gained_xp);
+	mvwprintw(main_game_win, 11, 3, "> You loot %d gold.", gained_gold);
 	build_char_menu();
 	wrefresh(main_game_win);
 	sleep_for(seconds(2));
@@ -695,7 +699,108 @@ void Game::enemy_death()
 	wrefresh(map_win);
 	wrefresh(combat_win);
 }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// SHOP FUNCTIONS
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+void Game::generate_shop_item()
+{
+	shared_ptr<Item> item;
+	item = shared_ptr<Item>(new Item(rand() % 100));
+	if (item.get()->get_level() >= (characters[active_character].get_level() + 1) || item.get()->get_level() == 0)
+	{
+		generate_shop_item();
+		return;
+	}
+	else
+	{
+		for (shared_ptr<Item> i : shop_items)
+			if (i.get()->get_id() == item.get()->get_id())
+			{
+				generate_shop_item();
+				return;
+			}
+	}
+	shop_items.push_back(item);
+}
+
+/*
+void Game::buy_item(shared_ptr<Item>& i, int o)
+{
+	if (gold >= i.get()->get_buy_value() && get_items().size() < inventory.get_cap())
+	{
+		cout << "\nYou purchased " << i.get()->get_name() << " for " << i.get()->get_buy_value() << " gold." << endl;
+		gold -= i.get()->get_buy_value();
+		get_items().push_back(i);
+		shop_items.erase(shop_items.begin() + o);
+		shop();
+	}
+	else if (get_items().size() >= inventory.get_cap())
+	{
+		cout << "Inventory full! Try dropping an item first." << endl;
+		shop();
+	}
+	else
+	{
+		cout << "\nYou don't have enough gold to buy this item!" << endl;
+		shop();
+	}
+}
+
+void Game::shop_item_options(shared_ptr<Item>& i, int o)
+{
+	cout << "\n>>>SHOP ITEM OPTIONS<<<" << endl;
+	if (i.get()->get_item_type() == 0)
+	{
+		cout << i.get()->get_name() << " | " << "COST:" << i.get()->get_buy_value() << " LVL:" << i.get()->get_level() << " HEALS:" << i.get()->get_defense() << " HP" << endl;
+	}
+	else if (i.get()->get_item_type() == 1)
+	{
+		cout << i.get()->get_name() << " | " << "COST:" << i.get()->get_buy_value() << " LVL:" << i.get()->get_level() << " MIN:" << i.get()->get_min_dmg() <<
+			" MAX:" << i.get()->get_max_dmg() << endl;
+	}
+	else if (i.get()->get_item_type() == 3 ||
+		i.get()->get_item_type() == 4 ||
+		i.get()->get_item_type() == 5 ||
+		i.get()->get_item_type() == 6)
+	{
+		cout << i.get()->get_name() << " | " << "COST:" << i.get()->get_buy_value() << " LVL: " << i.get()->get_level() << " DEF: " << i.get()->get_defense() << endl;
+	}
+	else if (i.get()->get_item_type() == 7)
+	{
+		cout << i.get()->get_name() << " | " << "COST:" << i.get()->get_buy_value() << " LVL: " << i.get()->get_level() << " BLK: " << i.get()->get_defense() << endl;
+	}
+	cout << "\n0. Buy Item" << endl;
+	cout << "1. Go Back" << endl;
+	cout << "\nYOUR GOLD: " << gold << endl;
+	cout << "\nEnter number of option: ";
+	int input = get_input(2);
+	if (input == 800) shop_item_options(i, o);
+	switch (input)
+	{
+	case 0: buy_item(i, o); break;
+	case 1: shop(); break;
+	}
+}
+
+void Game::shop_recycle()
+{
+	if (gold >= 15)
+	{
+		gold -= 15;
+		shop_items.clear();
+		shop();
+	}
+	else
+	{
+		cout << "\nNot enough gold!" << endl;
+		shop();
+	}
+}
+*/
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -703,8 +808,74 @@ void Game::enemy_death()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void Game::build_shop_menu()
+{
+	wclear(inventory_win);
+	wrefresh(inventory_win);
+	wclear(character_win);
+	wrefresh(character_win);
+	keypad(shop_win, true);
+	noecho();
+
+	box(shop_win, 0, 0);
+	mvwprintw(shop_win, 0, 15, "SHOP");
+	if (characters[active_character].get_gold() >= 0 && characters[active_character].get_gold() < 10) 
+		mvwprintw(shop_win, 9, 12, "GOLD: %d", characters[active_character].get_gold());
+	else if (characters[active_character].get_gold() >= 10 && characters[active_character].get_gold() < 100)
+		mvwprintw(shop_win, 9, 11, "GOLD: %d", characters[active_character].get_gold());
+	else if (characters[active_character].get_gold() >= 100 && characters[active_character].get_gold() < 1000)
+		mvwprintw(shop_win, 9, 10, "GOLD: %d", characters[active_character].get_gold());
+	wrefresh(shop_win);
+
+	/*
+	int choice;
+	int highlight = 0;
+
+	while (1)
+	{
+		for (int i = 0; i < characters[active_character].get_inventory().size(); i++)
+		{
+			if (i == highlight)
+				wattron(inventory_win, A_REVERSE);
+			mvwprintw(inventory_win, 1 + i, 1, characters[active_character].get_inventory().at(i).get()->get_name().c_str());
+			int ty, tx;
+			getyx(inventory_win, ty, tx);
+			if (characters[active_character].get_inventory().at(i).get()->get_equipped_int() == 1)
+			{
+				mvwprintw(inventory_win, ty, tx, " (E)");
+			}
+			wattroff(inventory_win, A_REVERSE);
+		}
+
+		if (highlight == characters[active_character].get_inventory().size())
+			wattron(inventory_win, A_REVERSE);
+		mvwprintw(inventory_win, 8, 1, "Go Back");
+		wattroff(inventory_win, A_REVERSE);
+
+		choice = wgetch(inventory_win);
+		switch (choice)
+		{
+		case KEY_DOWN: if (highlight < characters[active_character].get_inventory().size()) highlight++; break;
+		case KEY_UP: if (highlight > 0) highlight--; break;
+		}
+		if (choice == 10)
+		{
+			if (highlight == characters[active_character].get_inventory().size())
+			{
+				mvwprintw(inventory_win, 8, 1, "       ");
+				wrefresh(inventory_win);
+				break;
+			}
+		}
+	}
+	*/
+}
+
+
 void Game::build_char_menu()
 {
+	wclear(shop_win);
+	wrefresh(shop_win);
 	wclear(inventory_win);
 	wrefresh(inventory_win);
 	wclear(character_win);
@@ -719,6 +890,12 @@ void Game::build_char_menu()
 	mvwprintw(character_win, 6, 1, "DEF: %d", characters[active_character].get_defense());
 	mvwprintw(character_win, 7, 1, "BLK: %d", characters[active_character].get_block());
 	mvwprintw(character_win, 8, 1, "ATK: %d-%d", characters[active_character].get_min_dmg(), characters[active_character].get_max_dmg());
+	if (characters[active_character].get_gold() >= 0 && characters[active_character].get_gold() < 10)
+		mvwprintw(character_win, 9, 12, "GOLD: %d", characters[active_character].get_gold());
+	else if (characters[active_character].get_gold() >= 10 && characters[active_character].get_gold() < 100)
+		mvwprintw(character_win, 9, 11, "GOLD: %d", characters[active_character].get_gold());
+	else if (characters[active_character].get_gold() >= 100 && characters[active_character].get_gold() < 1000)
+		mvwprintw(character_win, 9, 10, "GOLD: %d", characters[active_character].get_gold());
 	wrefresh(character_win);
 }
 
@@ -806,6 +983,9 @@ void Game::build_game_menu()
 			case 2:
 				build_char_menu();
 				break;
+			case 3:
+				build_shop_menu();
+				break;
 			default: break;
 			}
 		}
@@ -814,6 +994,8 @@ void Game::build_game_menu()
 
 void Game::build_inv_menu()
 {
+	wclear(shop_win);
+	wrefresh(shop_win);
 	wclear(character_win);
 	wrefresh(character_win);
 	keypad(inventory_win, true);
@@ -821,6 +1003,14 @@ void Game::build_inv_menu()
 
 	box(inventory_win, 0, 0);
 	mvwprintw(inventory_win, 0, 10, "INVENTORY");
+	if (characters[active_character].get_gold() >= 0 && characters[active_character].get_gold() < 10)
+		mvwprintw(inventory_win, 9, 12, "GOLD: %d", characters[active_character].get_gold());
+	else if (characters[active_character].get_gold() >= 10 && characters[active_character].get_gold() < 100)
+		mvwprintw(inventory_win, 9, 11, "GOLD: %d", characters[active_character].get_gold());
+	else if (characters[active_character].get_gold() >= 100 && characters[active_character].get_gold() < 1000)
+		mvwprintw(inventory_win, 9, 10, "GOLD: %d", characters[active_character].get_gold());
+	wrefresh(inventory_win);
+
 	if (characters[active_character].get_inventory().size() == 0)
 		mvwprintw(inventory_win, 3, 5, "---EMPTY---");
 

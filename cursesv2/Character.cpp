@@ -18,6 +18,8 @@ Character::Character(string n)
 	min_dmg = 0;
 	max_dmg = 0;
 
+	gold = 0;
+
 	character = '@';
 
 	y_max = 0;
@@ -25,6 +27,10 @@ Character::Character(string n)
 
 	y_pos = 0;
 	x_pos = 0;
+
+	rh_weapon = shared_ptr<Item>(new Item(0));
+	armor = shared_ptr<Item>(new Item(1));
+	lh_weapon = shared_ptr<Item>(new Item(2));
 
 	initialize(n);
 }
@@ -45,10 +51,17 @@ void Character::initialize(string n)
 		((50 / 3) * (pow(level, 3)) -
 			(6 * pow(level, 3)) +
 			(17 * level) - 11);
-	block = 0;
-	defense = 0;
-	min_dmg = 3;
-	max_dmg = 6;
+
+	rh_weapon = shared_ptr<Item>(new Item(0));
+	armor = shared_ptr<Item>(new Item(1));
+	lh_weapon = shared_ptr<Item>(new Item(2));
+
+	gold = 0;
+
+	block = lh_weapon.get()->get_defense();
+	defense = armor.get()->get_defense();
+	min_dmg = rh_weapon.get()->get_min_dmg();
+	max_dmg = rh_weapon.get()->get_max_dmg();
 
 	y_pos = 3;
 	x_pos = 4;
@@ -82,6 +95,11 @@ void Character::level_up()
 void Character::gain_xp(int x)
 {
 	xp += x;
+}
+
+void Character::gain_gold(int g)
+{
+	gold += g;
 }
 
 void Character::set_curr_attack()

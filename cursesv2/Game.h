@@ -15,12 +15,15 @@ private:
 	WINDOW* game_menu_win;
 	WINDOW* character_win;
 	WINDOW* inventory_win;
+	WINDOW* shop_win;
 	WINDOW* main_game_win;
 	WINDOW* map_win;
 	WINDOW* info_win;
 	WINDOW* combat_win;
 
 	std::string filename;
+
+	std::vector<std::shared_ptr<Item>> shop_items;
 
 	std::vector<Character> characters;
 	int active_character;
@@ -65,7 +68,14 @@ public:
 	void player_death();
 	void enemy_death();
 
+	//Shop Functions
+	void generate_shop_item();
+	void buy_item(std::shared_ptr<Item>& i, int o);
+	void shop_item_options(std::shared_ptr<Item>& i, int o);
+	void shop_recycle();
+
 	//Window Functions
+	void build_shop_menu();
 	void build_char_menu();
 	void build_temp_game_menu();
 	void build_game_menu();

@@ -17,8 +17,12 @@ private:
 	int defense;
 	int min_dmg;
 	int max_dmg;
+	int gold;
 
 	char character;
+	std::shared_ptr<Item> rh_weapon;
+	std::shared_ptr<Item> armor;
+	std::shared_ptr<Item> lh_weapon;
 
 	int curr_attack;
 
@@ -42,6 +46,7 @@ public:
 
 	void level_up();
 	void gain_xp(int x);
+	void gain_gold(int g);
 
 	void set_curr_attack();
 
@@ -71,6 +76,8 @@ public:
 	const int get_block() const { return block; }
 	const int get_min_dmg() const { return min_dmg; }
 	const int get_max_dmg() const { return max_dmg; }
+
+	const int get_gold() const { return gold; }
 
 	const int get_curr_attack() const { return curr_attack; }
 
