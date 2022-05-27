@@ -69,6 +69,7 @@ public:
 	void enemy_death();
 
 	//Shop Functions
+	void shop();
 	void generate_shop_item();
 	void buy_item(std::shared_ptr<Item>& i, int o);
 	void shop_item_options(std::shared_ptr<Item>& i, int o);

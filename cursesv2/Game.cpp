@@ -213,7 +213,7 @@ void Game::load_game()
 		Character temp_char("");
 		vector<Enemy> temp_enemies;
 
-		while (getline(line, token, ' ') && counter < 13)
+		while (getline(line, token, ' '))
 		{
 			build_character(counter, token, line, temp_char, temp_enemies);
 			counter++;
@@ -241,7 +241,8 @@ void Game::build_character(int& c, string t, stringstream& line, Character& l, v
 	case 9: l.set_max_dmg(stoi(t)); break;
 	case 10: l.set_y_pos(stoi(t)); break;
 	case 11: l.set_x_pos(stoi(t)); break;
-	case 12: build_enemy(c, stoi(t), line, l, e); break;
+	case 12: l.set_gold(stoi(t)); break;
+	case 13: build_enemy(c, stoi(t), line, l, e); break;
 	}
 }
 
@@ -254,6 +255,7 @@ void Game::build_enemy(int& c, int count, stringstream& line, Character& l, vect
 		string token;
 		while (getline(line, token, ' '))
 		{
+			
 			if (counter >= count)
 			{
 				build_inventory(counter, token, l);
@@ -705,6 +707,14 @@ void Game::enemy_death()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void Game::shop()
+{
+	if (shop_items.size() < 3)
+	{
+		for (int i = shop_items.size(); i < 3; i++)
+			generate_shop_item();
+	}
+}
 
 void Game::generate_shop_item()
 {
@@ -785,22 +795,31 @@ void Game::shop_item_options(shared_ptr<Item>& i, int o)
 	case 1: shop(); break;
 	}
 }
-
+*/
 void Game::shop_recycle()
 {
-	if (gold >= 15)
+	if (characters[active_character].get_gold() >= 15)
 	{
-		gold -= 15;
+		characters[active_character].set_gold(characters[active_character].get_gold() - 15);
 		shop_items.clear();
 		shop();
+		wclear(shop_win);
+		box(shop_win, 0, 0);
+		mvwprintw(shop_win, 0, 15, "SHOP");
+		if (characters[active_character].get_gold() >= 0 && characters[active_character].get_gold() < 10)
+			mvwprintw(shop_win, 9, 12, "GOLD: %d", characters[active_character].get_gold());
+		else if (characters[active_character].get_gold() >= 10 && characters[active_character].get_gold() < 100)
+			mvwprintw(shop_win, 9, 11, "GOLD: %d", characters[active_character].get_gold());
+		else if (characters[active_character].get_gold() >= 100 && characters[active_character].get_gold() < 1000)
+			mvwprintw(shop_win, 9, 10, "GOLD: %d", characters[active_character].get_gold());
+		wrefresh(shop_win);
 	}
 	else
 	{
-		cout << "\nNot enough gold!" << endl;
 		shop();
 	}
 }
-*/
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -817,6 +836,8 @@ void Game::build_shop_menu()
 	keypad(shop_win, true);
 	noecho();
 
+	shop();
+
 	box(shop_win, 0, 0);
 	mvwprintw(shop_win, 0, 15, "SHOP");
 	if (characters[active_character].get_gold() >= 0 && characters[active_character].get_gold() < 10) 
@@ -827,48 +848,54 @@ void Game::build_shop_menu()
 		mvwprintw(shop_win, 9, 10, "GOLD: %d", characters[active_character].get_gold());
 	wrefresh(shop_win);
 
-	/*
+	
 	int choice;
 	int highlight = 0;
 
 	while (1)
 	{
-		for (int i = 0; i < characters[active_character].get_inventory().size(); i++)
+		for (int i = 0; i < shop_items.size(); i++)
 		{
 			if (i == highlight)
-				wattron(inventory_win, A_REVERSE);
-			mvwprintw(inventory_win, 1 + i, 1, characters[active_character].get_inventory().at(i).get()->get_name().c_str());
-			int ty, tx;
-			getyx(inventory_win, ty, tx);
-			if (characters[active_character].get_inventory().at(i).get()->get_equipped_int() == 1)
-			{
-				mvwprintw(inventory_win, ty, tx, " (E)");
-			}
-			wattroff(inventory_win, A_REVERSE);
+				wattron(shop_win, A_REVERSE);
+			mvwprintw(shop_win, 1 + i, 1, shop_items.at(i).get()->get_name().c_str());
+			wattroff(shop_win, A_REVERSE);
 		}
 
-		if (highlight == characters[active_character].get_inventory().size())
-			wattron(inventory_win, A_REVERSE);
-		mvwprintw(inventory_win, 8, 1, "Go Back");
-		wattroff(inventory_win, A_REVERSE);
+		if (highlight == shop_items.size())
+			wattron(shop_win, A_REVERSE);
+		mvwprintw(shop_win, 5, 1, "Recycle Cost: 15");
+		wattroff(shop_win, A_REVERSE);
 
-		choice = wgetch(inventory_win);
+		if (highlight == shop_items.size() + 1)
+			wattron(shop_win, A_REVERSE);
+		mvwprintw(shop_win, 8, 1, "Go Back");
+		wattroff(shop_win, A_REVERSE);
+
+		choice = wgetch(shop_win);
 		switch (choice)
 		{
-		case KEY_DOWN: if (highlight < characters[active_character].get_inventory().size()) highlight++; break;
+		case KEY_DOWN: if (highlight < shop_items.size() + 1) highlight++; break;
 		case KEY_UP: if (highlight > 0) highlight--; break;
 		}
 		if (choice == 10)
 		{
-			if (highlight == characters[active_character].get_inventory().size())
+			if (highlight == shop_items.size())
 			{
-				mvwprintw(inventory_win, 8, 1, "       ");
-				wrefresh(inventory_win);
+				shop_recycle();
+			}
+
+			if (highlight == shop_items.size() + 1)
+			{
+				mvwprintw(shop_win, 5, 1, "                ");
+				wrefresh(shop_win);
+				mvwprintw(shop_win, 8, 1, "       ");
+				wrefresh(shop_win);
 				break;
 			}
 		}
 	}
-	*/
+	
 }
 
 
@@ -998,6 +1025,8 @@ void Game::build_inv_menu()
 	wrefresh(shop_win);
 	wclear(character_win);
 	wrefresh(character_win);
+	wclear(inventory_win);
+	wrefresh(inventory_win);
 	keypad(inventory_win, true);
 	noecho();
 

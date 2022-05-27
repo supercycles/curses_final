@@ -100,6 +100,8 @@ public:
 	
 	void set_y_pos(int y) { y_pos = y; }
 	void set_x_pos(int x) { x_pos = x; }
+
+	void set_gold(int g) { gold = g; }
 };
 
 #endif /*CHARACTER_H*/
