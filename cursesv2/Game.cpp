@@ -10,7 +10,7 @@ Game::Game()
 	playing = true;
 
 	title_win = newwin(10, 100, 2, 10);
-	main_menu_win = newwin(5, 16, 18, 51);
+	main_menu_win = newwin(5, 16, 18, 52);
 	game_menu_win = newwin(10, 20, 5, 20);
 	character_win = newwin(10, 20, 15, 20);
 	inventory_win = newwin(10, 20, 15, 20);
@@ -169,7 +169,7 @@ void Game::print_enemies()
 			{
 				for (int j = 0; j < enemies.at(e).size(); j++)
 				{
-					mvwaddch(map_win, enemies[e].at(j).get_y_pos(), enemies[e].at(j).get_x_pos(), '!');
+					mvwprintw(map_win, enemies[e].at(j).get_y_pos(), enemies[e].at(j).get_x_pos(), "!");
 				}
 			}
 		}
@@ -281,7 +281,7 @@ void Game::load_character()
 	noecho();
 
 	generate_title_win();
-	WINDOW* load_win = newwin(12, 12, 13, 52);
+	WINDOW* load_win = newwin(12, 12, 13, 54);
 	refresh();
 
 	if (characters.size() == 0)
@@ -403,11 +403,6 @@ void Game::start_move()
 	{
 		print_enemies();
 
-		if (characters[active_character].get_hp() <= 0)
-		{
-			break;
-		}
-
 		for (int i = 0; i < enemies.at(active_character).size(); i++)
 		{
 			if (characters[active_character].get_y_pos() == enemies[active_character].at(i).get_y_pos() && characters[active_character].get_x_pos() == enemies[active_character].at(i).get_x_pos())
@@ -416,8 +411,7 @@ void Game::start_move()
 				start_combat();
 			}
 		}
-		characters[active_character].display();
-
+		
 		box(map_win, 0, 0);
 		box(info_win, 0, 0);
 		box(main_game_win, 0, 0);
@@ -427,10 +421,17 @@ void Game::start_move()
 		mvwprintw(info_win, 2, 1, "Floor: 1/4");
 
 		mvwprintw(main_game_win, 0, 36, "MAP");
+		wrefresh(info_win);
+		wrefresh(main_game_win);
+		if (characters[active_character].get_hp() <= 0)
+		{
+			return;
+		}
 		mvwprintw(main_game_win, 19, 1, "Press 'X' to Go Back");
 		mvwprintw(main_game_win, 13, 5, "@ = You");
 		mvwprintw(main_game_win, 13, 26, "! = Enemy");
 
+		characters[active_character].display();
 		print_enemies();
 
 		mvwaddch(map_win, characters[active_character].get_y_pos(), characters[active_character].get_x_pos(), '@');
@@ -438,7 +439,7 @@ void Game::start_move()
 		wrefresh(main_game_win);
 		wrefresh(info_win);
 		wrefresh(map_win);
-	} while (characters[active_character].get_move() != 'x');
+	} while (characters[active_character].get_move() != 'x' && characters[active_character].get_hp() > 0);
 
 	box(main_game_win, 0, 0);
 	box(map_win, 0, 0);
@@ -537,11 +538,12 @@ void Game::build_combat_window()
 			switch (highlight)
 			{
 			case 0: player_attack(); break;
-			case 1: player_block(); break;
+			case 1: player_block(); if (characters[active_character].get_hp() <= 0) { return; } break;
 			//case 2: build_inv_menu(); break;
 			case 3: build_char_menu(); break;
 			case 4: characters[active_character].set_x_pos(characters[active_character].get_x_pos() - 1); return; break;
 			}
+			
 		}
 	}
 }
@@ -550,6 +552,10 @@ void Game::player_attack()
 {
 	characters[active_character].set_curr_attack();
 	enemies[active_character].at(active_enemy).set_hp(enemies[active_character].at(active_enemy).get_hp() - characters[active_character].get_curr_attack());
+	mvwprintw(info_win, 2, 1, "              ");
+	wrefresh(info_win);
+	mvwprintw(info_win, 2, 1, "HP: %d/%d", enemies[active_character].at(active_enemy).get_hp(), enemies[active_character].at(active_enemy).get_hp_max());
+	wrefresh(info_win);
 	if (enemies[active_character].at(active_enemy).get_hp() <= 0)
 	{
 		enemy_death();
@@ -573,17 +579,13 @@ void Game::take_damage()
 	if (characters[active_character].get_hp() <= 0)
 	{
 		player_death();
+		return;
 	}
 	build_char_menu();
 	mvwprintw(character_win, 2, 1, "              ");
 	wrefresh(character_win);
 	mvwprintw(character_win, 2, 1, "HP: %d/%d", characters[active_character].get_hp(), characters[active_character].get_hp_max());
 	wrefresh(character_win);
-
-	mvwprintw(info_win, 2, 1, "              ");
-	wrefresh(info_win);
-	mvwprintw(info_win, 2, 1, "HP: %d/%d", enemies[active_character].at(active_enemy).get_hp(), enemies[active_character].at(active_enemy).get_hp_max());
-	wrefresh(info_win);
 }
 
 void Game::player_death()
@@ -593,20 +595,40 @@ void Game::player_death()
 	printw("!!!YOU DIED!!!");
 	refresh();
 	sleep_for(seconds(3));
+	move(15, 52);
+	printw("                 ");
+	refresh();
 
+	wclear(combat_win);
+	wrefresh(combat_win);
+	wclear(main_game_win);
+	wrefresh(main_game_win);
 	wclear(map_win);
 	wrefresh(map_win);
-	clear();
-	refresh();
-	build_game_menu();
+
+	build_temp_game_menu();
 }
 
 
 void Game::enemy_death()
 {
 	wclear(map_win);
-	wrefresh(map_win);
 	wclear(combat_win);
+	wrefresh(map_win);
+	wrefresh(combat_win);
+	wclear(main_game_win);
+	wrefresh(main_game_win);
+
+	box(main_game_win, 0, 0);
+	mvwprintw(main_game_win, 9, 3, "> You killed the %s!", enemies[active_character].at(active_enemy).get_name().c_str());
+	wrefresh(main_game_win);
+	sleep_for(seconds(2));
+
+	wclear(main_game_win);
+	wrefresh(main_game_win);
+	wclear(map_win);
+	wclear(combat_win);
+	wrefresh(map_win);
 	wrefresh(combat_win);
 }
 
@@ -634,6 +656,25 @@ void Game::build_char_menu()
 	wrefresh(character_win);
 }
 
+void Game::build_temp_game_menu()
+{
+	wclear(map_win);
+	wrefresh(map_win);
+	mvwaddch(map_win, characters[active_character].get_y_pos(), characters[active_character].get_x_pos(), '@');
+	print_enemies();
+	box(game_menu_win, 0, 0);
+	keypad(game_menu_win, true);
+
+	mvwprintw(game_menu_win, 0, 15, "MENU");
+	vector<string> menu_choices = { "Traverse Dungeon", "Inventory", "Character Sheet", "Shop" };
+
+	for (int i = 0; i < menu_choices.size(); i++)
+	{
+		mvwprintw(game_menu_win, 1 + i, 1, menu_choices[i].c_str());
+	}
+
+}
+
 void Game::build_game_menu()
 {
 	noecho();
@@ -647,6 +688,7 @@ void Game::build_game_menu()
 
 	while (1)
 	{
+
 		if (characters[active_character].get_hp() <= 0)
 		{
 			characters[active_character].initialize(characters.at(active_character).get_name());
@@ -667,6 +709,8 @@ void Game::build_game_menu()
 			wattron(game_menu_win, A_REVERSE);
 		mvwprintw(game_menu_win, 8, 1, "Back to Main Menu");
 		wattroff(game_menu_win, A_REVERSE);
+
+		wrefresh(game_menu_win);
 
 		choice = wgetch(game_menu_win);
 		switch (choice)

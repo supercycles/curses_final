@@ -66,6 +66,7 @@ public:
 
 	//Window Functions
 	void build_char_menu();
+	void build_temp_game_menu();
 	void build_game_menu();
 
 	//Accessors
