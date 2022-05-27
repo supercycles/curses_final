@@ -834,6 +834,12 @@ void Game::build_inv_menu()
 			if (i == highlight)
 				wattron(inventory_win, A_REVERSE);
 			mvwprintw(inventory_win, 1 + i, 1, characters[active_character].get_inventory().at(i).get()->get_name().c_str());
+			int ty, tx;
+			getyx(inventory_win, ty, tx);
+			if (characters[active_character].get_inventory().at(i).get()->get_equipped_int() == 1)
+			{
+				mvwprintw(inventory_win, ty, tx, " (E)");
+			}
 			wattroff(inventory_win, A_REVERSE);
 		}
 
