@@ -2,6 +2,8 @@
 #include "Character.h"
 
 using namespace std;
+using namespace std::this_thread;
+using namespace std::chrono;
 
 Character::Character(string n)
 {
@@ -50,6 +52,36 @@ void Character::initialize(string n)
 
 	y_pos = 3;
 	x_pos = 4;
+}
+
+void Character::level_up()
+{
+	while (xp >= xp_next)
+	{
+		wclear(main_game_win);
+		wrefresh(main_game_win);
+		box(main_game_win, 0, 0);
+		mvwprintw(main_game_win, 0, 31, "LEVEL UP");
+		level++;
+		xp = 0;
+		hp_max += 5;
+		hp = hp_max;
+		xp_next =
+			((50 / 3) * (pow(level, 3)) -
+				(6 * pow(level, 3)) +
+				(17 * level) - 11);
+		mvwprintw(main_game_win, 7, 3, "> You leveled up!");
+		mvwprintw(main_game_win, 9, 3, "> You are now level %d.", level);
+		wrefresh(main_game_win);
+		sleep_for(seconds(3));
+		wclear(main_game_win);
+		wrefresh(main_game_win);
+	}
+}
+
+void Character::gain_xp(int x)
+{
+	xp += x;
 }
 
 void Character::set_curr_attack()

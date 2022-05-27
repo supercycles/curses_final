@@ -2,7 +2,7 @@
 #ifndef CHARACTER_H
 #define CHARACTER_H
 
-#include "includes.h"
+#include "Item.h"
 
 class Character
 {
@@ -26,6 +26,8 @@ private:
 	int y_pos;
 	int x_pos;
 
+	std::vector<std::shared_ptr<Item>> inventory;
+
 	WINDOW* game_menu_win;
 	WINDOW* character_win;
 	WINDOW* inventory_win;
@@ -37,6 +39,10 @@ public:
 	Character(std::string n);
 	virtual ~Character();
 	void initialize(std::string n);
+
+	void level_up();
+	void gain_xp(int x);
+
 	void set_curr_attack();
 
 	//Move Functions
@@ -67,6 +73,8 @@ public:
 
 	const int get_y_pos() const { return y_pos; }
 	const int get_x_pos() const { return x_pos; }
+
+	std::vector<std::shared_ptr<Item>>& get_inventory() { return inventory; }
 
 	//Mutators
 	void set_name(std::string n) { name = n; }

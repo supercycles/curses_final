@@ -161,6 +161,21 @@ string Game::enemy_as_string(vector<Enemy> v, int c)
 
 void Game::print_enemies()
 {
+	if (enemies[active_character].size() == 0)
+	{
+		mvwprintw(main_game_win, 9, 3, "> Enemies Cleared!");
+		wrefresh(main_game_win);
+		sleep_for(seconds(2));
+		mvwprintw(main_game_win, 9, 3, "                   ");
+		wrefresh(main_game_win);
+		Enemy e1(rand() % characters[active_character].get_level() + 1, rand() % 6 + 1, rand() % 20 + 1);
+		Enemy e2(rand() % characters[active_character].get_level() + 1, rand() % 6 + 1, rand() % 20 + 1);
+		Enemy e3(rand() % characters[active_character].get_level() + 1, rand() % 6 + 1, rand() % 20 + 1);
+		enemies.at(active_character).push_back(e1);
+		enemies.at(active_character).push_back(e2);
+		enemies.at(active_character).push_back(e3);
+	}
+
 	if (enemies.size() > 0)
 	{
 		for (int e = 0; e < enemies.size(); e++)
@@ -400,7 +415,7 @@ void Game::start_move()
 	wrefresh(main_game_win);
 
 	do
-	{
+	{	
 		print_enemies();
 
 		for (int i = 0; i < enemies.at(active_character).size(); i++)
@@ -423,16 +438,19 @@ void Game::start_move()
 		mvwprintw(main_game_win, 0, 36, "MAP");
 		wrefresh(info_win);
 		wrefresh(main_game_win);
+		
 		if (characters[active_character].get_hp() <= 0)
 		{
 			return;
 		}
+
+		print_enemies();
+
 		mvwprintw(main_game_win, 19, 1, "Press 'X' to Go Back");
 		mvwprintw(main_game_win, 13, 5, "@ = You");
 		mvwprintw(main_game_win, 13, 26, "! = Enemy");
 
 		characters[active_character].display();
-		print_enemies();
 
 		mvwaddch(map_win, characters[active_character].get_y_pos(), characters[active_character].get_x_pos(), '@');
 
@@ -467,8 +485,6 @@ void Game::start_combat()
 	wclear(info_win);
 	wrefresh(info_win);
 
-	enemies[active_character].at(active_enemy).start_curr_attack();
-
 	box(main_game_win, 0, 0);
 	box(info_win, 0, 0);
 	mvwprintw(info_win, 0, 35, "INFO");
@@ -476,8 +492,6 @@ void Game::start_combat()
 	mvwprintw(info_win, 2, 1, "HP: %d/%d", enemies[active_character].at(active_enemy).get_hp(), enemies[active_character].at(active_enemy).get_hp_max());
 	mvwprintw(main_game_win, 0, 33, "COMBAT");
 	mvwprintw(main_game_win, 3, 2, "> You encountered a level %d %s!", enemies[active_character].at(active_enemy).get_level(), enemies[active_character].at(active_enemy).get_name().c_str());
-	mvwprintw(main_game_win, 5, 2, "> %s is attacking for %d damage!", enemies[active_character].at(active_enemy).get_name().c_str(), enemies[active_character].at(active_enemy).get_curr_attack());
-	mvwprintw(main_game_win, 7, 2, "> What will you do?");
 
 	wrefresh(main_game_win);
 	wrefresh(info_win);
@@ -499,6 +513,11 @@ void Game::build_combat_window()
 	vector<string> options = { "Attack", "Block", "Inventory", "Character Sheet", "Flee" };
 	int choice;
 	int highlight = 0;
+
+	enemies[active_character].at(active_enemy).start_curr_attack();
+	mvwprintw(main_game_win, 5, 2, "> %s is attacking for %d damage!", enemies[active_character].at(active_enemy).get_name().c_str(), enemies[active_character].at(active_enemy).get_curr_attack());
+	mvwprintw(main_game_win, 7, 2, "> What will you do?");
+	wrefresh(main_game_win);
 
 	while (1)
 	{
@@ -539,7 +558,7 @@ void Game::build_combat_window()
 			{
 			case 0: player_attack(); break;
 			case 1: player_block(); if (characters[active_character].get_hp() <= 0) { return; } break;
-			//case 2: build_inv_menu(); break;
+			case 2: build_inv_menu(); break;
 			case 3: build_char_menu(); break;
 			case 4: characters[active_character].set_x_pos(characters[active_character].get_x_pos() - 1); return; break;
 			}
@@ -568,7 +587,6 @@ void Game::player_attack()
 
 void Game::player_block()
 {
-	enemies[active_character].at(active_enemy).start_curr_attack();
 	enemies[active_character].at(active_enemy).set_curr_attack(enemies[active_character].at(active_enemy).get_curr_attack() - characters[active_character].get_block());
 	take_damage();
 }
@@ -582,10 +600,11 @@ void Game::take_damage()
 		return;
 	}
 	build_char_menu();
-	mvwprintw(character_win, 2, 1, "              ");
-	wrefresh(character_win);
-	mvwprintw(character_win, 2, 1, "HP: %d/%d", characters[active_character].get_hp(), characters[active_character].get_hp_max());
-	wrefresh(character_win);
+
+	enemies[active_character].at(active_enemy).start_curr_attack();
+	mvwprintw(main_game_win, 5, 2, "> %s is attacking for %d damage!", enemies[active_character].at(active_enemy).get_name().c_str(), enemies[active_character].at(active_enemy).get_curr_attack());
+	mvwprintw(main_game_win, 7, 2, "> What will you do?");
+	wrefresh(main_game_win);
 }
 
 void Game::player_death()
@@ -619,10 +638,19 @@ void Game::enemy_death()
 	wclear(main_game_win);
 	wrefresh(main_game_win);
 
+	int gained_xp = (enemies[active_character].at(active_enemy).get_level() * enemies[active_character].at(active_enemy).get_level()) * 10;
+	characters[active_character].gain_xp(gained_xp);
+
 	box(main_game_win, 0, 0);
-	mvwprintw(main_game_win, 9, 3, "> You killed the %s!", enemies[active_character].at(active_enemy).get_name().c_str());
+	mvwprintw(main_game_win, 0, 33, "COMBAT");
+	mvwprintw(main_game_win, 7, 3, "> You killed the %s!", enemies[active_character].at(active_enemy).get_name().c_str());
+	mvwprintw(main_game_win, 9, 3, "> You gain %d XP.", gained_xp);
+	build_char_menu();
 	wrefresh(main_game_win);
 	sleep_for(seconds(2));
+
+	characters[active_character].level_up();
+	build_char_menu();
 
 	wclear(main_game_win);
 	wrefresh(main_game_win);
@@ -643,6 +671,8 @@ void Game::build_char_menu()
 {
 	wclear(inventory_win);
 	wrefresh(inventory_win);
+	wclear(character_win);
+	wrefresh(character_win);
 	box(character_win, 0, 0);
 	mvwprintw(character_win, 0, 10, "CHARACTER");
 	mvwprintw(character_win, 1, 1, "NAME: %s", characters[active_character].get_name().c_str());
@@ -735,12 +765,60 @@ void Game::build_game_menu()
 				start_move();
 				break;
 			case 1:
-				//build_inv_menu();
+				build_inv_menu();
 				break;
 			case 2:
 				build_char_menu();
 				break;
 			default: break;
+			}
+		}
+	}
+}
+
+void Game::build_inv_menu()
+{
+	wclear(character_win);
+	wrefresh(character_win);
+	keypad(inventory_win, true);
+	noecho();
+
+	box(inventory_win, 0, 0);
+	mvwprintw(inventory_win, 0, 10, "INVENTORY");
+	if (characters[active_character].get_inventory().size() == 0)
+		mvwprintw(inventory_win, 3, 5, "---EMPTY---");
+
+	int choice;
+	int highlight = 0;
+
+	while (1)
+	{
+		for (int i = 0; i < characters[active_character].get_inventory().size(); i++)
+		{
+			if (i == highlight)
+				wattron(inventory_win, A_REVERSE);
+			mvwprintw(inventory_win, 1 + i, 1, characters[active_character].get_inventory().at(i).get()->get_name().c_str());
+			wattroff(inventory_win, A_REVERSE);
+		}
+
+		if (highlight == characters[active_character].get_inventory().size())
+			wattron(inventory_win, A_REVERSE);
+		mvwprintw(inventory_win, 8, 1, "Go Back");
+		wattroff(inventory_win, A_REVERSE);
+
+		choice = wgetch(inventory_win);
+		switch (choice)
+		{
+		case KEY_DOWN: if (highlight < characters[active_character].get_inventory().size()) highlight++; break;
+		case KEY_UP: if (highlight > 0) highlight--; break;
+		}
+		if (choice == 10)
+		{
+			if (highlight == characters[active_character].get_inventory().size())
+			{
+				mvwprintw(inventory_win, 8, 1, "       ");
+				wrefresh(inventory_win);
+				break;
 			}
 		}
 	}

@@ -11,7 +11,7 @@ Enemy::Enemy(int l, int y, int x)
 	hp = hp_max;
 
 	min_dmg = level * 1;
-	max_dmg = level * 2;
+	max_dmg = level * 3;
 
 	curr_attack = 0;
 

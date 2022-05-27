@@ -68,6 +68,7 @@ public:
 	void build_char_menu();
 	void build_temp_game_menu();
 	void build_game_menu();
+	void build_inv_menu();
 
 	//Accessors
 	const bool get_playing()& { return playing; }
