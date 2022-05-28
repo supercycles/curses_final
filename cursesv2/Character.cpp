@@ -59,7 +59,7 @@ void Character::initialize(string n)
 
 	gold = 0;
 
-	block = lh_weapon.get()->get_defense();
+	block = lh_weapon.get()->get_block();
 	defense = armor.get()->get_defense();
 	min_dmg = rh_weapon.get()->get_min_dmg();
 	max_dmg = rh_weapon.get()->get_max_dmg();
@@ -77,7 +77,6 @@ void Character::level_up()
 		box(main_game_win, 0, 0);
 		mvwprintw(main_game_win, 0, 31, "LEVEL UP");
 		level++;
-		xp = 0;
 		hp_max += 5;
 		hp = hp_max;
 		xp_next =
@@ -109,6 +108,26 @@ void Character::set_curr_attack()
 	while (curr_attack < min_dmg)
 		curr_attack++;
 }
+
+void Character::set_rh_weapon(shared_ptr<Item>& i)
+{
+	rh_weapon = i;
+	min_dmg = rh_weapon.get()->get_min_dmg();
+	max_dmg = rh_weapon.get()->get_max_dmg();
+}
+
+void Character::set_lh_weapon(shared_ptr<Item>& i)
+{
+	lh_weapon = i;
+	block = lh_weapon.get()->get_block();
+}
+
+void Character::set_armor(shared_ptr<Item>& i)
+{
+	armor = i;
+	defense = armor.get()->get_defense();
+}
+
 
 void Character::add_item()
 {

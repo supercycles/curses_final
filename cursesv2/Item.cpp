@@ -64,6 +64,8 @@ void Item::initialize(int d)
 	case 0: id = 0; name = "Fists"; level = 0; item_type = 1; buy_value = 0; block = 0; defense = 0; min_dmg = 3; max_dmg = 6; break;
 	case 1: id = 1; name = "No Armor"; level = 0; item_type = 2; buy_value = 0; block = 0; defense = 0; min_dmg = 0; max_dmg = 0; break;
 	case 2: id = 2; name = "No Shield"; level = 0; item_type = 3; buy_value = 0; block = 0; defense = 0; min_dmg = 0; max_dmg = 0; break;
+	case 3: id = 3; name = "Milk"; level = 1; item_type = 0; buy_value = 3; block = 0; defense = 3; min_dmg = 0; max_dmg = 0; break;
+	case 4: id = 4; name = "Porkchop"; level = 1; item_type = 0; buy_value = 5; block = 0; defense = 5; min_dmg = 0; max_dmg = 0; break;
 	case 10: id = 10; name = "Rusty Sword"; level = 1; item_type = 1; buy_value = 5; block = 0; defense = 0; min_dmg = 5; max_dmg = 8; break;
 	case 11: id = 11; name = "Thief Clothes"; level = 1; item_type = 2; buy_value = 20; block = 0; defense = 2; min_dmg = 0; max_dmg = 0; break;
 	case 12: id = 12; name = "Plank Shield"; level = 1; item_type = 3; buy_value = 10; block = 3; defense = 0; min_dmg = 0; max_dmg = 0; break;

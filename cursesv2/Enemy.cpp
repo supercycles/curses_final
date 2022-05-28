@@ -25,10 +25,17 @@ Enemy::~Enemy()
 
 }
 
+void Enemy::set_curr_attack(int a) 
+{ 
+	curr_attack = a; 
+	while (curr_attack < 0)
+		curr_attack++;
+}
+
 void Enemy::start_curr_attack()
 {
 	curr_attack = rand() % max_dmg + 1;
-	if (curr_attack < min_dmg)
+	while (curr_attack < min_dmg)
 		curr_attack++;
 }
 

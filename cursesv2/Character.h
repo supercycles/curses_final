@@ -51,6 +51,9 @@ public:
 	void gain_gold(int g);
 
 	void set_curr_attack();
+	void set_rh_weapon(std::shared_ptr<Item>& i);
+	void set_lh_weapon(std::shared_ptr<Item>& i);
+	void set_armor(std::shared_ptr<Item>& i);
 
 	void add_item();
 

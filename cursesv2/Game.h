@@ -74,12 +74,17 @@ public:
 	void buy_item(std::shared_ptr<Item>& i, int o);
 	void shop_recycle();
 
+	//Inventory Functions
+	void use_item(std::shared_ptr<Item>& i, int n);
+	void equip_item(std::shared_ptr<Item>& i);
+
 	//Window Functions
 	void build_shop_item_menu(std::shared_ptr<Item>& i, int o);
 	void build_shop_menu();
 	void build_char_menu();
 	void build_temp_game_menu();
 	void build_game_menu();
+	void build_inv_item_menu(std::shared_ptr<Item>& i, int n);
 	void build_inv_menu();
 
 	//Accessors
