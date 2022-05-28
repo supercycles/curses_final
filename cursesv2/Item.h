@@ -37,6 +37,7 @@ public:
 
 	const int& get_level() const { return level; }
 	const int& get_buy_value() const { return buy_value; }
+	const int& get_block() const { return block; }
 
 	const int& get_item_type() const { return item_type; }
 	const int& get_min_dmg() const { return min_dmg; }

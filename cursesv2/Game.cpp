@@ -759,43 +759,8 @@ void Game::buy_item(shared_ptr<Item>& i, int o)
 		shop();
 	}
 }
-
-void Game::shop_item_options(shared_ptr<Item>& i, int o)
-{
-	cout << "\n>>>SHOP ITEM OPTIONS<<<" << endl;
-	if (i.get()->get_item_type() == 0)
-	{
-		cout << i.get()->get_name() << " | " << "COST:" << i.get()->get_buy_value() << " LVL:" << i.get()->get_level() << " HEALS:" << i.get()->get_defense() << " HP" << endl;
-	}
-	else if (i.get()->get_item_type() == 1)
-	{
-		cout << i.get()->get_name() << " | " << "COST:" << i.get()->get_buy_value() << " LVL:" << i.get()->get_level() << " MIN:" << i.get()->get_min_dmg() <<
-			" MAX:" << i.get()->get_max_dmg() << endl;
-	}
-	else if (i.get()->get_item_type() == 3 ||
-		i.get()->get_item_type() == 4 ||
-		i.get()->get_item_type() == 5 ||
-		i.get()->get_item_type() == 6)
-	{
-		cout << i.get()->get_name() << " | " << "COST:" << i.get()->get_buy_value() << " LVL: " << i.get()->get_level() << " DEF: " << i.get()->get_defense() << endl;
-	}
-	else if (i.get()->get_item_type() == 7)
-	{
-		cout << i.get()->get_name() << " | " << "COST:" << i.get()->get_buy_value() << " LVL: " << i.get()->get_level() << " BLK: " << i.get()->get_defense() << endl;
-	}
-	cout << "\n0. Buy Item" << endl;
-	cout << "1. Go Back" << endl;
-	cout << "\nYOUR GOLD: " << gold << endl;
-	cout << "\nEnter number of option: ";
-	int input = get_input(2);
-	if (input == 800) shop_item_options(i, o);
-	switch (input)
-	{
-	case 0: buy_item(i, o); break;
-	case 1: shop(); break;
-	}
-}
 */
+
 void Game::shop_recycle()
 {
 	if (characters[active_character].get_gold() >= 15)
@@ -827,8 +792,104 @@ void Game::shop_recycle()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void Game::build_shop_item_menu(shared_ptr<Item>& i)
+{
+	wclear(shop_win);
+	wrefresh(shop_win);
+	wclear(inventory_win);
+	wrefresh(inventory_win);
+	wclear(character_win);
+	wrefresh(character_win);
+	keypad(shop_win, true);
+	noecho();
+
+	shop();
+
+	box(shop_win, 0, 0);
+	mvwprintw(shop_win, 0, 15, "SHOP");
+	if (characters[active_character].get_gold() >= 0 && characters[active_character].get_gold() < 10)
+		mvwprintw(shop_win, 9, 12, "GOLD: %d", characters[active_character].get_gold());
+	else if (characters[active_character].get_gold() >= 10 && characters[active_character].get_gold() < 100)
+		mvwprintw(shop_win, 9, 11, "GOLD: %d", characters[active_character].get_gold());
+	else if (characters[active_character].get_gold() >= 100 && characters[active_character].get_gold() < 1000)
+		mvwprintw(shop_win, 9, 10, "GOLD: %d", characters[active_character].get_gold());
+	wrefresh(shop_win);
+
+	vector<string> options = { "Buy Item" };
+	int choice;
+	int highlight = 0;
+
+	while (1)
+	{
+		mvwprintw(shop_win, 2, 1, "%s", i.get()->get_name().c_str());
+		if (i.get()->get_item_type() == 0)
+		{
+			mvwprintw(shop_win, 3, 1, "COST: %d", i.get()->get_buy_value());
+			mvwprintw(shop_win, 4, 1, "LEVEL: %d", i.get()->get_level());
+			mvwprintw(shop_win, 5, 1, "HEALS: %d", i.get()->get_defense());
+		}
+		else if (i.get()->get_item_type() == 1)
+		{
+			mvwprintw(shop_win, 3, 1, "COST: %d", i.get()->get_buy_value());
+			mvwprintw(shop_win, 4, 1, "LEVEL: %d", i.get()->get_level());
+			mvwprintw(shop_win, 5, 1, "ATK: %d-%d", i.get()->get_min_dmg(), i.get()->get_max_dmg());
+		}
+		else if (i.get()->get_item_type() == 2)
+		{
+			mvwprintw(shop_win, 3, 1, "COST: %d", i.get()->get_buy_value());
+			mvwprintw(shop_win, 4, 1, "LEVEL: %d", i.get()->get_level());
+			mvwprintw(shop_win, 5, 1, "DEF: %d", i.get()->get_defense());
+		}
+		else if (i.get()->get_item_type() == 3)
+		{
+			mvwprintw(shop_win, 3, 1, "COST: %d", i.get()->get_buy_value());
+			mvwprintw(shop_win, 4, 1, "LEVEL: %d", i.get()->get_level());
+			mvwprintw(shop_win, 5, 1, "BLK: %d", i.get()->get_block());
+		}
+
+		for (int i = 0; i < options.size(); i++)
+		{
+			if (i == highlight)
+				wattron(shop_win, A_REVERSE);
+			mvwprintw(shop_win, 7, 1, options.at(i).c_str());
+			wattroff(shop_win, A_REVERSE);
+		}
+
+		if (highlight == options.size())
+			wattron(shop_win, A_REVERSE);
+		mvwprintw(shop_win, 8, 1, "Go Back");
+		wattroff(shop_win, A_REVERSE);
+
+		choice = wgetch(shop_win);
+		switch (choice)
+		{
+		case KEY_DOWN: if (highlight < options.size()) highlight++; break;
+		case KEY_UP: if (highlight > 0) highlight--; break;
+		}
+		if (choice == 10)
+		{
+			if (highlight == 0)
+			{
+
+			}
+			if (highlight == options.size())
+			{
+				mvwprintw(shop_win, 2, 1, "              ");
+				mvwprintw(shop_win, 3, 1, "              ");
+				mvwprintw(shop_win, 4, 1, "              ");
+				mvwprintw(shop_win, 5, 1, "              ");
+				mvwprintw(shop_win, 7, 1, "              ");
+				return;
+			}
+		}
+	}
+
+}
+
 void Game::build_shop_menu()
 {
+	wclear(shop_win);
+	wrefresh(shop_win);
 	wclear(inventory_win);
 	wrefresh(inventory_win);
 	wclear(character_win);
@@ -885,13 +946,18 @@ void Game::build_shop_menu()
 				shop_recycle();
 			}
 
-			if (highlight == shop_items.size() + 1)
+			else if (highlight == shop_items.size() + 1)
 			{
 				mvwprintw(shop_win, 5, 1, "                ");
 				wrefresh(shop_win);
 				mvwprintw(shop_win, 8, 1, "       ");
 				wrefresh(shop_win);
 				break;
+			}
+
+			else
+			{
+				build_shop_item_menu(shop_items.at(highlight));
 			}
 		}
 	}

@@ -76,6 +76,7 @@ public:
 	void shop_recycle();
 
 	//Window Functions
+	void build_shop_item_menu(std::shared_ptr<Item>& i);
 	void build_shop_menu();
 	void build_char_menu();
 	void build_temp_game_menu();
