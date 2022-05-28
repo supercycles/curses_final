@@ -27,6 +27,7 @@ Character::Character(string n)
 
 	y_pos = 0;
 	x_pos = 0;
+	cap = 6;
 
 	rh_weapon = shared_ptr<Item>(new Item(0));
 	armor = shared_ptr<Item>(new Item(1));

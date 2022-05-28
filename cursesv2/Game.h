@@ -72,11 +72,10 @@ public:
 	void shop();
 	void generate_shop_item();
 	void buy_item(std::shared_ptr<Item>& i, int o);
-	void shop_item_options(std::shared_ptr<Item>& i, int o);
 	void shop_recycle();
 
 	//Window Functions
-	void build_shop_item_menu(std::shared_ptr<Item>& i);
+	void build_shop_item_menu(std::shared_ptr<Item>& i, int o);
 	void build_shop_menu();
 	void build_char_menu();
 	void build_temp_game_menu();

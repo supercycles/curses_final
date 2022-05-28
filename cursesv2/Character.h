@@ -30,6 +30,8 @@ private:
 	int y_pos;
 	int x_pos;
 
+	int cap;
+
 	std::vector<std::shared_ptr<Item>> inventory;
 
 	WINDOW* game_menu_win;
@@ -76,13 +78,14 @@ public:
 	const int get_block() const { return block; }
 	const int get_min_dmg() const { return min_dmg; }
 	const int get_max_dmg() const { return max_dmg; }
-
 	const int get_gold() const { return gold; }
 
 	const int get_curr_attack() const { return curr_attack; }
 
 	const int get_y_pos() const { return y_pos; }
 	const int get_x_pos() const { return x_pos; }
+
+	const int get_cap() const { return 6; }
 
 	std::vector<std::shared_ptr<Item>>& get_inventory() { return inventory; }
 
