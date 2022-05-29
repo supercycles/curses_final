@@ -10,5 +10,10 @@
 #include <ctime>
 #include <chrono>
 #include <thread>
+#include <soundio/soundio.h>
+#include <stdio.h>
+#include <windows.h>
+#include <MMsystem.h>
+#pragma comment(lib, "winmm.lib")
 
 #endif /*INCLUDES_H*/

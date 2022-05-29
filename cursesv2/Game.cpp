@@ -853,6 +853,10 @@ void Game::equip_item(shared_ptr<Item>& i)
 		refresh(); 
 		break;
 	case 1:
+		for (int j = 0; j < characters[active_character].get_inventory().size(); j++)
+			if (characters[active_character].get_inventory().at(j).get()->get_item_type() == 1 && characters[active_character].get_inventory().at(j).get()->get_equipped_int() == 1)
+				characters[active_character].get_inventory().at(j).get()->set_equipped(0);
+
 		i.get()->set_equipped(1);
 		characters[active_character].set_rh_weapon(i);
 		mvprintw(26, 21, "Equipped %s!", i.get()->get_name().c_str());
@@ -862,6 +866,9 @@ void Game::equip_item(shared_ptr<Item>& i)
 		refresh();
 		break;
 	case 2:
+		for (int j = 0; j < characters[active_character].get_inventory().size(); j++)
+			if (characters[active_character].get_inventory().at(j).get()->get_item_type() == 2 && characters[active_character].get_inventory().at(j).get()->get_equipped_int() == 1)
+				characters[active_character].get_inventory().at(j).get()->set_equipped(0);
 		i.get()->set_equipped(1);
 		characters[active_character].set_armor(i);
 		mvprintw(26, 21, "Equipped %s!", i.get()->get_name().c_str());
@@ -871,6 +878,10 @@ void Game::equip_item(shared_ptr<Item>& i)
 		refresh();
 		break;
 	case 3:
+		for (int j = 0; j < characters[active_character].get_inventory().size(); j++)
+			if (characters[active_character].get_inventory().at(j).get()->get_item_type() == 3 && characters[active_character].get_inventory().at(j).get()->get_equipped_int() == 1)
+				characters[active_character].get_inventory().at(j).get()->set_equipped(0);
+
 		i.get()->set_equipped(1);
 		characters[active_character].set_lh_weapon(i);
 		mvprintw(26, 21, "Equipped %s!", i.get()->get_name().c_str());

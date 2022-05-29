@@ -9,6 +9,7 @@ int main()
 
 	Game game;
 	game.load_game();
+	PlaySound(TEXT("C:\\Users\\Ethan\\source\\repos\\windowsmusic\\windowsmusic\\x64\\Debug\\StarWars60.wav"), NULL, SND_ASYNC);
 
 	while (game.get_playing())
 	{
