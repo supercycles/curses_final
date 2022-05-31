@@ -72,6 +72,7 @@ void Character::level_up()
 {
 	while (xp >= xp_next)
 	{
+		PlaySound(TEXT("C:\\Users\\Ethan\\source\\repos\\cursesv2\\cursesv2\\x64\\Debug\\Music\\level_up"), NULL, SND_ASYNC);
 		wclear(main_game_win);
 		wrefresh(main_game_win);
 		box(main_game_win, 0, 0);
@@ -83,8 +84,8 @@ void Character::level_up()
 			((50 / 3) * (pow(level, 3)) -
 				(6 * pow(level, 3)) +
 				(17 * level) - 11);
-		mvwprintw(main_game_win, 7, 3, "> You leveled up!");
-		mvwprintw(main_game_win, 9, 3, "> You are now level %d.", level);
+		mvwprintw(main_game_win, 8, 3, "> You leveled up!");
+		mvwprintw(main_game_win, 10, 3, "> You are now level %d.", level);
 		wrefresh(main_game_win);
 		sleep_for(seconds(3));
 		wclear(main_game_win);

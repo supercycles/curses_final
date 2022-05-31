@@ -26,7 +26,6 @@ public:
 
 	//Functions
 	void initialize(int d);
-	std::string get_as_string();
 
 	//Accessors
 	const std::string get_name() const { return name; }

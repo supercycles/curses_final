@@ -94,8 +94,8 @@ void Game::main_menu()
 		choice = wgetch(main_menu_win);
 		switch (choice)
 		{
-		case KEY_DOWN: if (highlight < menu_choices.size() - 1) highlight++; break;
-		case KEY_UP: if (highlight > 0) highlight--; break;
+		case KEY_DOWN: if (highlight < menu_choices.size() - 1) { highlight++; } break;
+		case KEY_UP: if (highlight > 0) { highlight--; } break;
 		}
 		if (choice == 10)
 		{
@@ -164,7 +164,18 @@ string Game::enemy_as_string(vector<Enemy> v, int c)
 
 void Game::print_enemies()
 {
-	if (enemies[active_character].size() == 0)
+	if (enemies[active_character].size() == 0 && characters[active_character].get_hp() <= 0)
+	{
+		wrefresh(main_game_win);
+		Enemy e1(1, rand() % 6 + 1, rand() % 20 + 1);
+		Enemy e2(1, rand() % 6 + 1, rand() % 20 + 1);
+		Enemy e3(1, rand() % 6 + 1, rand() % 20 + 1);
+		enemies.at(active_character).push_back(e1);
+		enemies.at(active_character).push_back(e2);
+		enemies.at(active_character).push_back(e3);
+	}
+
+	else if (enemies[active_character].size() == 0 && characters[active_character].get_hp() > 0)
 	{
 		mvwprintw(main_game_win, 9, 3, "> Enemies Cleared!");
 		wrefresh(main_game_win);
@@ -265,11 +276,24 @@ void Game::build_enemy(int& c, int count, stringstream& line, Character& l, vect
 			Enemy temp_enemy(0, 0, 0);
 			for (int i = 0; i < token.size(); i++)
 			{
-				switch (i)
+				if (token.size() == 4)
 				{
-				case 0: temp_enemy.set_level(stoi(token.substr(0, 1))); break;
-				case 1: temp_enemy.set_y_pos(stoi(token.substr(1, 1))); break;
-				case 2: temp_enemy.set_x_pos(stoi(token.substr(2))); break;
+					switch (i)
+					{
+					case 0: temp_enemy.set_level(stoi(token.substr(0, 1))); break;
+					case 1: temp_enemy.set_y_pos(stoi(token.substr(1, 1))); break;
+					case 2: temp_enemy.set_x_pos(stoi(token.substr(2))); break;
+					}
+				}
+				else if (token.size() == 5)
+				{
+					char yp = token.at(2);
+					switch (i)
+					{
+					case 0: temp_enemy.set_level(stoi(token.substr(0, 2))); break;
+					case 1: temp_enemy.set_y_pos(stoi(string(1, yp))); break;
+					case 2: temp_enemy.set_x_pos(stoi(token.substr(3, 4))); break;
+					}
 				}
 			}
 			e.push_back(temp_enemy);
@@ -313,7 +337,7 @@ void Game::new_character()
 	characters.push_back(new_char);
 	active_character = characters.size() - 1;
 
-	//characters[active_character].add_item();
+	play_intro();
 
 	vector<Enemy> char_enemies;
 	enemies.push_back(char_enemies);
@@ -327,6 +351,58 @@ void Game::new_character()
 	wclear(char_win);
 	wrefresh(char_win);
 	start_game();
+}
+
+void Game::play_intro()
+{
+	PlaySound(TEXT("C:\\Users\\Ethan\\source\\repos\\cursesv2\\cursesv2\\x64\\Debug\\Music\\intro.wav"), NULL, SND_ASYNC);
+	clear();
+	refresh();
+
+	mvprintw(15, 47, "So, %s is your name, huh?", characters[active_character].get_name().c_str());
+	refresh();
+	sleep_for(seconds(5));
+	clear();
+	refresh();
+	mvprintw(15, 51, "Won't matter here.");
+	refresh();
+	sleep_for(seconds(5));
+	clear();
+	refresh();
+	mvprintw(15, 22, "Welcome to the depths of Astre - end of the world for scum like you and me.");
+	refresh();
+	sleep_for(seconds(6));
+	clear();
+	refresh();
+	mvprintw(15, 46, "What? ");
+	refresh();
+	sleep_for(seconds(2));
+	mvprintw(15, 52, "You say you're different?");
+	refresh();
+	sleep_for(seconds(4));
+	clear();
+	refresh();
+	mvprintw(15, 46, "HA! ");
+	refresh();
+	sleep_for(seconds(2));
+	mvprintw(15, 50, "Your kind falls the quickest.");
+	refresh();
+	sleep_for(seconds(4));
+	clear();
+	refresh();
+	mvprintw(15, 47, "I won't be holding my breath...");
+	refresh();
+	sleep_for(seconds(4));
+	clear();
+	refresh();
+	mvprintw(14, 20, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+	mvprintw(15, 20, "And so, your journey begins. Remember - The only path to dawn is through dusk...");
+	mvprintw(16, 20, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+	refresh();
+	sleep_for(seconds(6));
+
+	clear();
+	refresh();
 }
 
 void Game::load_character()
@@ -404,6 +480,8 @@ void Game::start_game()
 	clear();
 	refresh();
 
+	play_random_music();
+
 	build_char_menu();
 	box(map_win, 0, 0);
 	box(info_win, 0, 0);
@@ -442,6 +520,17 @@ void Game::start_game()
 	wrefresh(info_win);
 	clear();
 	refresh();
+}
+
+void Game::play_random_music()
+{
+	int random_music = rand() % 3 + 1;
+	switch (random_music)
+	{
+	case 1: PlaySound(TEXT("C:\\Users\\Ethan\\source\\repos\\cursesv2\\cursesv2\\x64\\Debug\\Music\\track_5"), NULL, SND_LOOP | SND_ASYNC); break;
+	case 2: PlaySound(TEXT("C:\\Users\\Ethan\\source\\repos\\cursesv2\\cursesv2\\x64\\Debug\\Music\\field_theme_2"), NULL, SND_LOOP | SND_ASYNC); break;
+	case 3: PlaySound(TEXT("C:\\Users\\Ethan\\source\\repos\\cursesv2\\cursesv2\\x64\\Debug\\Music\\track_1"), NULL, SND_LOOP | SND_ASYNC); break;
+	}
 }
 
 void Game::start_move()
@@ -524,6 +613,15 @@ void Game::start_combat()
 	wclear(info_win);
 	wrefresh(info_win);
 
+	srand(time(NULL));
+	int random_music = rand() % 3 + 1;
+	switch (random_music)
+	{
+	case 1: PlaySound(TEXT("C:\\Users\\Ethan\\source\\repos\\cursesv2\\cursesv2\\x64\\Debug\\Music\\battle_4.wav"), NULL, SND_LOOP | SND_ASYNC); break;
+	case 2: PlaySound(TEXT("C:\\Users\\Ethan\\source\\repos\\cursesv2\\cursesv2\\x64\\Debug\\Music\\battle_2.wav"), NULL, SND_LOOP | SND_ASYNC); break;
+	case 3: PlaySound(TEXT("C:\\Users\\Ethan\\source\\repos\\cursesv2\\cursesv2\\x64\\Debug\\Music\\battle.wav"), NULL, SND_LOOP | SND_ASYNC); break;
+	}
+
 	box(main_game_win, 0, 0);
 	box(info_win, 0, 0);
 	mvwprintw(info_win, 0, 35, "INFO");
@@ -535,6 +633,7 @@ void Game::start_combat()
 	wrefresh(main_game_win);
 	wrefresh(info_win);
 	build_combat_window();
+	play_random_music();
 
 	wclear(main_game_win);
 	wrefresh(main_game_win);
@@ -642,6 +741,7 @@ void Game::take_damage()
 	build_char_menu();
 
 	enemies[active_character].at(active_enemy).start_curr_attack();
+	mvwprintw(main_game_win, 5, 2, "                                     ");
 	mvwprintw(main_game_win, 5, 2, "> %s is attacking for %d damage!", enemies[active_character].at(active_enemy).get_name().c_str(), enemies[active_character].at(active_enemy).get_curr_attack());
 	mvwprintw(main_game_win, 7, 2, "> What will you do?");
 	wrefresh(main_game_win);
@@ -653,7 +753,7 @@ void Game::player_death()
 	move(15, 52);
 	printw("!!!YOU DIED!!!");
 	refresh();
-	sleep_for(seconds(3));
+	PlaySound(TEXT("C:\\Users\\Ethan\\source\\repos\\cursesv2\\cursesv2\\x64\\Debug\\Music\\game_over_2.wav"), NULL, SND_SYNC);
 	move(15, 52);
 	printw("                 ");
 	refresh();
@@ -665,6 +765,8 @@ void Game::player_death()
 	wclear(map_win);
 	wrefresh(map_win);
 
+	shop_items.clear();
+	enemies.at(active_character).clear();
 	build_temp_game_menu();
 }
 
@@ -677,6 +779,8 @@ void Game::enemy_death()
 	wrefresh(combat_win);
 	wclear(main_game_win);
 	wrefresh(main_game_win);
+
+	PlaySound(TEXT("C:\\Users\\Ethan\\source\\repos\\cursesv2\\cursesv2\\x64\\Debug\\RPGSoundPack\\inventory\\coin.wav"), NULL, SND_ASYNC);
 
 	int gained_xp = (enemies[active_character].at(active_enemy).get_level() * enemies[active_character].at(active_enemy).get_level()) * 10;
 	int gained_gold = rand() % (enemies[active_character].at(active_enemy).get_level() * 10) + 1;
@@ -780,6 +884,8 @@ void Game::buy_item(shared_ptr<Item>& i, int o)
 		mvwprintw(shop_win, 9, 11, "GOLD: %d", characters[active_character].get_gold());
 	else if (characters[active_character].get_gold() >= 100 && characters[active_character].get_gold() < 1000)
 		mvwprintw(shop_win, 9, 10, "GOLD: %d", characters[active_character].get_gold());
+	else if (characters[active_character].get_gold() >= 1000 && characters[active_character].get_gold() < 10000)
+		mvwprintw(shop_win, 9, 9, "GOLD: %d", characters[active_character].get_gold());
 	wrefresh(shop_win);
 }
 
@@ -799,6 +905,8 @@ void Game::shop_recycle()
 			mvwprintw(shop_win, 9, 11, "GOLD: %d", characters[active_character].get_gold());
 		else if (characters[active_character].get_gold() >= 100 && characters[active_character].get_gold() < 1000)
 			mvwprintw(shop_win, 9, 10, "GOLD: %d", characters[active_character].get_gold());
+		else if (characters[active_character].get_gold() >= 1000 && characters[active_character].get_gold() < 10000)
+			mvwprintw(shop_win, 9, 9, "GOLD: %d", characters[active_character].get_gold());
 		wrefresh(shop_win);
 	}
 	else
@@ -859,7 +967,7 @@ void Game::equip_item(shared_ptr<Item>& i)
 
 		i.get()->set_equipped(1);
 		characters[active_character].set_rh_weapon(i);
-		mvprintw(26, 21, "Equipped %s!", i.get()->get_name().c_str());
+		mvprintw(26, 21, "%s Equipped!", i.get()->get_name().c_str());
 		refresh();
 		sleep_for(seconds(1));
 		mvprintw(26, 21, "                              ");
@@ -871,7 +979,7 @@ void Game::equip_item(shared_ptr<Item>& i)
 				characters[active_character].get_inventory().at(j).get()->set_equipped(0);
 		i.get()->set_equipped(1);
 		characters[active_character].set_armor(i);
-		mvprintw(26, 21, "Equipped %s!", i.get()->get_name().c_str());
+		mvprintw(26, 21, "%s Equipped!", i.get()->get_name().c_str());
 		refresh();
 		sleep_for(seconds(1));
 		mvprintw(26, 21, "                              ");
@@ -884,7 +992,7 @@ void Game::equip_item(shared_ptr<Item>& i)
 
 		i.get()->set_equipped(1);
 		characters[active_character].set_lh_weapon(i);
-		mvprintw(26, 21, "Equipped %s!", i.get()->get_name().c_str());
+		mvprintw(26, 21, "%s Equipped!", i.get()->get_name().c_str());
 		refresh();
 		sleep_for(seconds(1));
 		mvprintw(26, 21, "                              ");
@@ -920,6 +1028,8 @@ void Game::build_shop_item_menu(shared_ptr<Item>& i, int o)
 		mvwprintw(shop_win, 9, 11, "GOLD: %d", characters[active_character].get_gold());
 	else if (characters[active_character].get_gold() >= 100 && characters[active_character].get_gold() < 1000)
 		mvwprintw(shop_win, 9, 10, "GOLD: %d", characters[active_character].get_gold());
+	else if (characters[active_character].get_gold() >= 1000 && characters[active_character].get_gold() < 10000)
+		mvwprintw(shop_win, 9, 9, "GOLD: %d", characters[active_character].get_gold());
 	wrefresh(shop_win);
 
 	vector<string> options = { "Buy Item" };
@@ -1020,6 +1130,8 @@ void Game::build_shop_menu()
 		mvwprintw(shop_win, 9, 11, "GOLD: %d", characters[active_character].get_gold());
 	else if (characters[active_character].get_gold() >= 100 && characters[active_character].get_gold() < 1000)
 		mvwprintw(shop_win, 9, 10, "GOLD: %d", characters[active_character].get_gold());
+	else if (characters[active_character].get_gold() >= 1000 && characters[active_character].get_gold() < 10000)
+		mvwprintw(shop_win, 9, 9, "GOLD: %d", characters[active_character].get_gold());
 	wrefresh(shop_win);
 
 	
@@ -1102,6 +1214,8 @@ void Game::build_char_menu()
 		mvwprintw(character_win, 9, 11, "GOLD: %d", characters[active_character].get_gold());
 	else if (characters[active_character].get_gold() >= 100 && characters[active_character].get_gold() < 1000)
 		mvwprintw(character_win, 9, 10, "GOLD: %d", characters[active_character].get_gold());
+	else if (characters[active_character].get_gold() >= 1000 && characters[active_character].get_gold() < 10000)
+		mvwprintw(character_win, 9, 9, "GOLD: %d", characters[active_character].get_gold());
 	wrefresh(character_win);
 }
 
@@ -1109,7 +1223,6 @@ void Game::build_temp_game_menu()
 {
 	wclear(map_win);
 	wrefresh(map_win);
-	mvwaddch(map_win, characters[active_character].get_y_pos(), characters[active_character].get_x_pos(), '@');
 	print_enemies();
 	box(game_menu_win, 0, 0);
 	keypad(game_menu_win, true);
@@ -1165,8 +1278,8 @@ void Game::build_game_menu()
 		choice = wgetch(game_menu_win);
 		switch (choice)
 		{
-		case KEY_DOWN: if (highlight < menu_choices.size()) highlight++; break;
-		case KEY_UP: if (highlight > 0) highlight--; break;
+		case KEY_DOWN: if (highlight < menu_choices.size()) { highlight++; } break;
+		case KEY_UP: if (highlight > 0) { highlight--; } break;
 		default: break;
 		}
 		if (choice == 10)
@@ -1177,6 +1290,7 @@ void Game::build_game_menu()
 				wrefresh(game_menu_win);
 				wclear(map_win);
 				wrefresh(map_win);
+				PlaySound(TEXT("C:\\Users\\Ethan\\source\\repos\\cursesv2\\cursesv2\\x64\\Debug\\Music\\track_3.wav"), NULL, SND_LOOP | SND_ASYNC);
 				return;
 			}
 			switch (highlight)
@@ -1218,6 +1332,8 @@ void Game::build_inv_item_menu(shared_ptr<Item>& i, int n)
 		mvwprintw(inventory_win, 9, 11, "GOLD: %d", characters[active_character].get_gold());
 	else if (characters[active_character].get_gold() >= 100 && characters[active_character].get_gold() < 1000)
 		mvwprintw(inventory_win, 9, 10, "GOLD: %d", characters[active_character].get_gold());
+	else if (characters[active_character].get_gold() >= 1000 && characters[active_character].get_gold() < 10000)
+		mvwprintw(inventory_win, 9, 9, "GOLD: %d", characters[active_character].get_gold());
 	wrefresh(inventory_win);
 
 	vector<string> options = { "Use", "Equip", "Drop" };
@@ -1279,7 +1395,16 @@ void Game::build_inv_item_menu(shared_ptr<Item>& i, int n)
 			{
 			case 0: use_item(characters[active_character].get_inventory().at(n), n); return; break;
 			case 1: equip_item(characters[active_character].get_inventory().at(n)); return; break;
-			case 2: break;
+
+			case 2:
+				mvprintw(26, 21, "%s dropped!", i.get()->get_name().c_str());
+				refresh();
+				sleep_for(seconds(1));
+				mvprintw(26, 21, "                        ");
+				refresh();
+				characters[active_character].get_inventory().erase(characters[active_character].get_inventory().begin() + n); 
+				return; 
+				break;
 			}
 			if (highlight == options.size())
 			{
@@ -1309,6 +1434,8 @@ void Game::build_inv_menu()
 		mvwprintw(inventory_win, 9, 11, "GOLD: %d", characters[active_character].get_gold());
 	else if (characters[active_character].get_gold() >= 100 && characters[active_character].get_gold() < 1000)
 		mvwprintw(inventory_win, 9, 10, "GOLD: %d", characters[active_character].get_gold());
+	else if (characters[active_character].get_gold() >= 1000 && characters[active_character].get_gold() < 10000)
+		mvwprintw(inventory_win, 9, 9, "GOLD: %d", characters[active_character].get_gold());
 	wrefresh(inventory_win);
 
 	if (characters[active_character].get_inventory().size() == 0)

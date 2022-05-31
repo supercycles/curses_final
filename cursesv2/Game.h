@@ -53,10 +53,12 @@ public:
 	void build_enemy(int& c, int count, std::stringstream& line, Character& l, std::vector<Enemy>& e);
 	void build_inventory(int& c, std::string token, Character& l);
 	void new_character();
+	void play_intro();
 	void load_character();
 
 	//Game Functions
 	void start_game();
+	void play_random_music();
 	void start_move();
 
 	//Combat Functions
